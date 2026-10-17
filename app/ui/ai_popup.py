@@ -24,20 +24,19 @@ class AIContextPopup(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setAttribute(Qt.WA_StyledBackground, True)
+        # No separate window flags — stays a child widget floating over the parent
+        # This works correctly on both Windows and Linux/Wayland
         self.setFixedWidth(360)
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(
-            "QWidget{background:#282B28;border-radius:14px;"
-            "border:1px solid #3D413D;}"
+            "AIContextPopup{"
+            "background:#282B28;"
+            "border-radius:14px;"
+            "border:1px solid #3D413D;"
+            "}"
         )
-
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(24)
-        shadow.setOffset(0, 6)
-        shadow.setColor(QColor(0, 0, 0, 100))
-        self.setGraphicsEffect(shadow)
+        # Raise above siblings
+        self.raise_()
 
         self._model        : str           = ""
         self._selected_text: str           = ""
@@ -189,23 +188,31 @@ class AIContextPopup(QWidget):
 
     def show_near(self, global_pos: QPoint, selected_text: str,
                   context: str = "", doc_name: str = ""):
-        """Show the idle popup near the given global position."""
+        """Show the popup near the given GLOBAL screen position."""
         self._selected_text = selected_text
         self._context       = context
         self._doc_name      = doc_name
 
-        # Reset to idle state
         self._show_idle()
-
         self.adjustSize()
-        # Position above the selection
-        x = global_pos.x() - self.width() // 2
-        y = global_pos.y() - self.height() - 10
-        # Keep on screen
-        if x < 0:
-            x = 0
-        if y < 0:
-            y = global_pos.y() + 20
+
+        # Convert global position → local coordinates of our parent widget
+        if self.parent():
+            local_pos = self.parent().mapFromGlobal(global_pos)
+        else:
+            local_pos = global_pos
+
+        x = local_pos.x() - self.width() // 2
+        y = local_pos.y() - self.height() - 12
+
+        # Keep inside parent bounds
+        if self.parent():
+            pw = self.parent().width()
+            ph = self.parent().height()
+            x = max(4, min(x, pw - self.width() - 4))
+            if y < 4:
+                y = local_pos.y() + 20   # show below if not enough room above
+
         self.move(x, y)
         self.show()
         self.raise_()

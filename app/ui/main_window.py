@@ -66,6 +66,10 @@ class MainWindow(QMainWindow):
         body_lay.addWidget(self.workspace, 1)
         root.addWidget(body, 1)
 
+        # Re-parent the AI popup to MainWindow so it can float over everything
+        self.workspace.ai_popup.setParent(self)
+        self.workspace.ai_popup.hide()
+
     def _wire_signals(self):
         self.tab_bar.tabSelected.connect(self._on_tab_selected)
         self.tab_bar.tabClosed.connect(self._on_tab_closed)

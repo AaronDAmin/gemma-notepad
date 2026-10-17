@@ -129,6 +129,7 @@ class Workspace(QWidget):
         outer.addWidget(self.upload_panel, 0, Qt.AlignTop)
 
         # ── AI context popup (floats over workspace) ───────────────────────────
+        # NOTE: popup is created here but re-parented to MainWindow in main_window.py
         self.ai_popup = AIContextPopup(self)
         self.ai_popup.hide()
 
