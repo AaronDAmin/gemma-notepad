@@ -162,6 +162,22 @@ class MainWindow(QMainWindow):
             self.sidebar.set_active_tool("select")
 
     def _on_quiz_tool(self):
+        # Pass current model and PDF text to the quiz view
+        pdf_text = ""
+        doc_name = ""
+        if self.workspace.pdf_viewer._doc is not None:
+            from app.services.pdf_service import pdf_service
+            doc  = self.workspace.pdf_viewer._doc
+            pages = range(doc.page_count)
+            pdf_text = "\n\n".join(
+                "\n".join(b["text"] for b in pdf_service.get_text_blocks(doc, p))
+                for p in pages
+            )
+            doc_name = self.workspace.pdf_viewer._doc_name
+
+        self.workspace.quiz_view.set_context(
+            self._active_model, pdf_text, doc_name
+        )
         self.workspace.show_quiz()
 
     def _on_settings(self):
@@ -331,3 +347,8 @@ class MainWindow(QMainWindow):
             self._active_model = model
             settings_repo.set("active_model", model)
             self.ai_popup.set_model(model)
+            self.workspace.quiz_view.set_context(
+                model,
+                self.workspace.quiz_view._doc_text,
+                self.workspace.quiz_view._doc_name
+            )

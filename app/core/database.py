@@ -43,6 +43,10 @@ class DatabaseManager:
                     value TEXT
                 );
             """)
+            # Ensure a default workspace exists (id=1)
+            conn.execute(
+                "INSERT OR IGNORE INTO workspaces(id, name) VALUES(1, 'Default')"
+            )
 
 
 # Module-level singleton
