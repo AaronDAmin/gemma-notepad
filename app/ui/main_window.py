@@ -287,8 +287,10 @@ class MainWindow(QMainWindow):
 
         # Ollama status
         running = ollama_service.is_running()
+        host_str = ollama_service.active_host() if running else "Not connected"
         status_lbl = QLabel(
-            f"Ollama:  {'✓ Running' if running else '✗ Not running'}"
+            f"Ollama:  {'✓ Running' if running else '✗ Not running'}  "
+            f"{'(' + host_str + ')' if running else ''}"
         )
         status_lbl.setStyleSheet(
             f"color:{'#4CAF82' if running else '#E05555'};"
