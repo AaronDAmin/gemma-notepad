@@ -1,4 +1,4 @@
-# MUSTARD — AI-Powered Study Notepad
+# GemmaNotepad1 — AI-Powered Study Notepad
 
 A modern, fully offline Python desktop application for studying PDFs with local AI explanations and quiz generation.
 
@@ -6,8 +6,8 @@ A modern, fully offline Python desktop application for studying PDFs with local 
 
 ```bash
 # 1. Create and activate a virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
+
+      # Windows
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -26,7 +26,7 @@ python main.py
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 1 — Desktop UI | ✅ Complete | Full MUSTARD-themed UI shell |
+| 1 — Desktop UI | ✅ Complete | Full GemmaNotepad1-themed UI shell |
 | 2 — Documents  | 🔜 Next     | PDF rendering, text selection, image display |
 | 3 — AI         | 🔜 Planned  | Ollama integration, AI popup, explanations |
 | 4 — Quiz       | 🔜 Planned  | MCQ generation, scoring, history |

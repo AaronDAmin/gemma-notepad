@@ -1,5 +1,5 @@
 """
-MUSTARD Study Notepad — entry point.
+GemmaNotepad1 Study Notepad — entry point.
 
 Usage:
     python main.py
@@ -34,7 +34,7 @@ def configure_app(app: QApplication) -> None:
     """Set application-wide properties."""
     app.setApplicationName(APP_NAME)
     app.setApplicationVersion("0.1.0")
-    app.setOrganizationName("MustardStudy")
+    app.setOrganizationName("GemmaNotepad1Study")
 
     # High-DPI support (AA_UseHighDpiPixmaps is deprecated in Qt 6 — built-in by default)
 
