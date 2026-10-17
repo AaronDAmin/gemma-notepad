@@ -15,12 +15,14 @@ class DocumentTab(QWidget):
 
     def __init__(self, tab_id: int, title: str, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.tab_id  = tab_id
         self._active = False
 
         self.setCursor(Qt.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.setFixedHeight(34)
+        self.setFixedHeight(46)
+        self.setMinimumWidth(150)
 
         lay = QHBoxLayout(self)
         lay.setContentsMargins(14, 0, 8, 0)
@@ -47,10 +49,10 @@ class DocumentTab(QWidget):
         if active:
             # Active tab: same GemmaNotepad1 as background → stands out via weight/text
             self.setStyleSheet(
-                "QWidget{background:#F0C94C; border-radius:10px;}"
+                "QWidget{background:#F0C94C; border-top-left-radius:12px;border-top-right-radius:12px;}"
             )
             self.label.setStyleSheet(
-                "color:#1A1C1A; font-size:13px; font-weight:600;"
+                "color:#1A1C1A; font-size:15px; font-weight:600;"
                 "background:transparent;"
             )
             self.close_btn.setStyleSheet(
@@ -61,18 +63,18 @@ class DocumentTab(QWidget):
         else:
             # Inactive tab: dark charcoal pill on the GemmaNotepad1 strip
             self.setStyleSheet(
-                "QWidget{background:#343834; border-radius:10px;}"
+                "QWidget{background:#343834; border-top-left-radius:12px;border-top-right-radius:12px;}"
                 "QWidget:hover{background:#3D413D;}"
             )
             self.label.setStyleSheet(
-                "color:#B0B8B0; font-size:13px; font-weight:500;"
+                "color:#FFF1CC; font-size:15px; font-weight:500;"
                 "background:transparent;"
             )
             self.close_btn.setStyleSheet(
                 "QPushButton{background:transparent; color:#6A7A6A;"
                 "font-size:10px; border:none; border-radius:4px;}"
                 "QPushButton:hover{background:rgba(255,255,255,0.08);"
-                "color:#B0B8B0;}"
+                "color:#FFF1CC;}"
             )
 
     def set_title(self, title: str):
@@ -97,14 +99,14 @@ class TabBar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(52)
+        self.setFixedHeight(70)
         self.setAutoFillBackground(True)  # ensure paintEvent fills the rect
 
         self._tabs: dict[int, DocumentTab] = {}
         self._active_id: int | None = None
 
         outer = QHBoxLayout(self)
-        outer.setContentsMargins(12, 9, 12, 9)
+        outer.setContentsMargins(108, 24, 16, 0)
         outer.setSpacing(0)
 
         # Scrollable area for tabs
@@ -113,7 +115,8 @@ class TabBar(QWidget):
         self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self._scroll.setWidgetResizable(True)
         self._scroll.setFrameShape(QFrame.NoFrame)
-        self._scroll.setFixedHeight(34)
+        self._scroll.setFixedHeight(46)
+        self._scroll.setFixedWidth(0)
         self._scroll.setStyleSheet(
             "QScrollArea, QScrollArea > QWidget, "
             "QScrollArea > QWidget > QWidget {"
@@ -126,16 +129,17 @@ class TabBar(QWidget):
         self._tab_layout.setContentsMargins(0, 0, 0, 0)
         self._tab_layout.setSpacing(6)
         self._tab_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self._tab_layout.addStretch()
+
 
         self._scroll.setWidget(self._tab_container)
+        self._scroll.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
 
         # + button — slightly darker GemmaNotepad1 so it reads as a button
         self.new_tab_btn = QPushButton("+")
-        self.new_tab_btn.setFixedSize(34, 34)
+        self.new_tab_btn.setFixedSize(42, 42)
         self.new_tab_btn.setCursor(Qt.PointingHandCursor)
         self.new_tab_btn.setStyleSheet(
-            "QPushButton{background:#C89010; border-radius:10px;"
+            "QPushButton{background:#FFD04D; border-top-left-radius:12px;border-top-right-radius:12px;"
             "color:#1A1C1A; font-size:22px; font-weight:300; border:none;}"
             "QPushButton:hover{background:#B07800;}"
             "QPushButton:pressed{background:#906000;}"
@@ -145,11 +149,12 @@ class TabBar(QWidget):
         outer.addWidget(self._scroll, 1)
         outer.addSpacing(8)
         outer.addWidget(self.new_tab_btn, 0, Qt.AlignVCenter)
+        outer.addStretch(1)
 
     # ── Paint the GemmaNotepad1 background explicitly ────────────────────────────────
     def paintEvent(self, event):
         p = QPainter(self)
-        p.fillRect(self.rect(), QColor("#F0C94C"))
+        p.fillRect(self.rect(), QColor("#202A27"))
         p.end()
 
     # ── Public API ─────────────────────────────────────────────────────────────
@@ -158,9 +163,10 @@ class TabBar(QWidget):
         tab = DocumentTab(tab_id, title)
         tab.closeRequested.connect(self._on_close)
         tab.selected.connect(self._on_select)
-        stretch_idx = self._tab_layout.count() - 1
+        stretch_idx = self._tab_layout.count()
         self._tab_layout.insertWidget(stretch_idx, tab)
         self._tabs[tab_id] = tab
+        self._scroll.setFixedWidth(min(620, sum(max(150, t.sizeHint().width()) for t in self._tabs.values()) + 6 * len(self._tabs)))
         if activate:
             self._activate(tab_id)
 
@@ -169,6 +175,9 @@ class TabBar(QWidget):
         if tab:
             self._tab_layout.removeWidget(tab)
             tab.deleteLater()
+        self._scroll.setFixedWidth(min(620, sum(max(150, t.sizeHint().width()) for t in self._tabs.values()) + 6 * len(self._tabs)))
+        if not self._tabs:
+            self._active_id = None
         if self._active_id == tab_id and self._tabs:
             self._activate(list(self._tabs.keys())[-1])
 
@@ -202,4 +211,3 @@ class TabBar(QWidget):
 
     def _on_select(self, tab_id: int):
         self._activate(tab_id)
-        self.tabSelected.emit(tab_id)

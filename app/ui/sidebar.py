@@ -22,7 +22,7 @@ class SidebarButton(QWidget):
         self._hovered = False
 
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedSize(62, 64)
+        self.setFixedSize(80, 90)
         self.setAttribute(Qt.WA_Hover, True)
 
         lay = QVBoxLayout(self)
@@ -89,16 +89,16 @@ class SidebarButton(QWidget):
                 "background:transparent;font-size:22px;color:#1A1C1A;"
             )
             self._text.setStyleSheet(
-                "background:transparent;font-size:11px;"
+                "background:transparent;font-size:14px;"
                 "font-weight:700;color:#1A1C1A;"
             )
         else:
-            text_col = "#C0C8C0" if self._hovered else "#6A7A6A"
+            text_col = "#C0C8C0" if self._hovered else "#FFF1CC"
             self._icon.setStyleSheet(
                 f"background:transparent;font-size:22px;color:{text_col};"
             )
             self._text.setStyleSheet(
-                f"background:transparent;font-size:11px;"
+                f"background:transparent;font-size:14px;"
                 f"font-weight:500;color:{text_col};"
             )
 
@@ -117,14 +117,14 @@ class Sidebar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(78)
+        self.setFixedWidth(104)
         # Paint background explicitly so it isn't transparent
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setStyleSheet("QWidget{background:#282B28;}")
+        self.setStyleSheet("QWidget{background:#202A27;}")
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(8, 16, 8, 16)
-        root.setSpacing(4)
+        root.setContentsMargins(12, 0, 12, 20)
+        root.setSpacing(14)
         root.setAlignment(Qt.AlignTop)
 
         # Tool buttons — use a cursor icon from unicode for Select
@@ -171,7 +171,7 @@ class Sidebar(QWidget):
         b.setToolTip(tip)
         b.setStyleSheet(
             "QPushButton{background:transparent;border-radius:10px;"
-            "color:#4A5A4A;font-size:18px;border:none;}"
+            "color:#FFF1CC;font-size:18px;border:none;}"
             "QPushButton:hover{background:#343834;color:#B0B8B0;}"
         )
         return b

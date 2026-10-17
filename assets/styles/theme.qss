@@ -18,7 +18,7 @@ QLabel {
 }
 
 QMainWindow, QMainWindow > QWidget {
-    background-color: #282B28;
+    background-color: #202A27;
 }
 
 /* ── Scrollbars ───────────────────────────────────────────────────────────── */
@@ -64,7 +64,7 @@ QScrollBar::sub-line:horizontal {
 
 /* ── Sidebar ──────────────────────────────────────────────────────────────── */
 #sidebar {
-    background-color: #282B28;
+    background-color: #202A27;
     min-width: 78px;
     max-width: 78px;
 }
@@ -164,7 +164,7 @@ QScrollBar::sub-line:horizontal {
 
 /* ── Central Workspace ────────────────────────────────────────────────────── */
 #workspaceContainer {
-    background-color: #282B28;
+    background-color: #202A27;
     padding: 12px 12px 12px 8px;
 }
 
@@ -258,7 +258,7 @@ QScrollBar::sub-line:horizontal {
 
 /* ── AI Popup ─────────────────────────────────────────────────────────────── */
 #aiContextPopup {
-    background-color: #282B28;
+    background-color: #202A27;
     border-radius: 12px;
     border: 1px solid #3D413D;
 }

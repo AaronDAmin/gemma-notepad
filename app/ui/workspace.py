@@ -89,14 +89,14 @@ class Workspace(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("workspaceContainer")
-        self.setStyleSheet("#workspaceContainer{background:#282B28; padding:12px 12px 12px 8px;}")
+        self.setStyleSheet("#workspaceContainer{background:#202A27;}")
 
         self._upload_visible = False
         self._prev_mode = MODE_EMPTY
 
         outer = QHBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.setSpacing(12)
+        outer.setContentsMargins(0, 0, 8, 8)
+        outer.setSpacing(4)
 
         # ── Content stack ──────────────────────────────────────────────────────
         self._stack = QStackedWidget()
@@ -126,7 +126,7 @@ class Workspace(QWidget):
         # ── Upload panel (hidden by default) ───────────────────────────────────
         self.upload_panel = UploadPanel()
         self.upload_panel.setVisible(False)
-        outer.addWidget(self.upload_panel, 0, Qt.AlignTop)
+        outer.addWidget(self.upload_panel)
 
         # ── AI context popup (floats over workspace) ───────────────────────────
         # NOTE: popup is created here but re-parented to MainWindow in main_window.py

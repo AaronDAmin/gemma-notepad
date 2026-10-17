@@ -28,7 +28,8 @@ class PDFToolbar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(48)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setFixedHeight(56)
         self.setStyleSheet(
             "QWidget{background:#FFF8EC;"
             "border-top-left-radius:16px;border-top-right-radius:16px;}"
@@ -227,8 +228,8 @@ class PDFViewer(QWidget):
         self._doc_name    : str   = ""
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(0)
+        root.setContentsMargins(18, 16, 18, 8)
+        root.setSpacing(4)
 
         self.toolbar = PDFToolbar(self)
         root.addWidget(self.toolbar)
@@ -244,9 +245,9 @@ class PDFViewer(QWidget):
         self.scroll.setFrameShape(QFrame.NoFrame)
         self.scroll.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.scroll.setStyleSheet(
-            "QScrollArea{background:#E8DDB0;border:none;"
+            "QScrollArea{background:#F7E7B5;border:none;"
             "border-bottom-left-radius:16px;border-bottom-right-radius:16px;}"
-            "QScrollArea > QWidget{background:#E8DDB0;}"
+            "QScrollArea > QWidget{background:#F7E7B5;}"
         )
 
         self.page_widget = PDFPageWidget()

@@ -17,10 +17,11 @@ class UploadOptionCard(QWidget):
                  bg_color: str = "#F7E7B5", icon_bg: str = "rgba(0,0,0,0.10)",
                  parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self._bg   = bg_color
         self._hover = self._darken(bg_color)
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedHeight(62)
+        self.setFixedHeight(80)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         lay = QHBoxLayout(self)
@@ -29,14 +30,14 @@ class UploadOptionCard(QWidget):
 
         # Icon square
         icon_box = QFrame()
-        icon_box.setFixedSize(36, 36)
+        icon_box.setFixedSize(48, 48)
         icon_box.setStyleSheet(
             f"background:{icon_bg}; border-radius:8px;"
         )
         icon_lbl = QLabel(icon, icon_box)
         icon_lbl.setAlignment(Qt.AlignCenter)
-        icon_lbl.setGeometry(0, 0, 36, 36)
-        icon_lbl.setStyleSheet("background:transparent; font-size:18px;")
+        icon_lbl.setGeometry(0, 0, 48, 48)
+        icon_lbl.setStyleSheet("background:transparent; font-size:24px;color:#15201D;")
 
         # Text
         text_w = QWidget()
@@ -47,11 +48,11 @@ class UploadOptionCard(QWidget):
 
         lbl_title = QLabel(title)
         lbl_title.setStyleSheet(
-            "background:transparent;font-size:14px;font-weight:600;color:#1A1C1A;"
+            "background:transparent;font-size:16px;font-weight:600;color:#1A1C1A;"
         )
         lbl_desc = QLabel(desc)
         lbl_desc.setStyleSheet(
-            "background:transparent;font-size:11px;color:#4A4E4A;"
+            "background:transparent;font-size:12px;color:#4A4E4A;"
         )
         text_l.addWidget(lbl_title)
         text_l.addWidget(lbl_desc)
@@ -99,11 +100,17 @@ class UploadOptionCard(QWidget):
 class RecentItem(QWidget):
     """One row in the Recent Uploads list."""
 
+    clicked = Signal()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.rect().contains(event.position().toPoint()):
+            self.clicked.emit()
+
     def __init__(self, icon: str, name: str, meta: str,
                  badge_color: str = "#F0C94C", parent=None):
         super().__init__(parent)
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedHeight(46)
+        self.setFixedHeight(68)
 
         lay = QHBoxLayout(self)
         lay.setContentsMargins(4, 6, 4, 6)
@@ -131,11 +138,12 @@ class RecentItem(QWidget):
         lbl_name.setStyleSheet(
             "background:transparent;font-size:13px;font-weight:500;color:#1A1C1A;"
         )
-        lbl_name.setMaximumWidth(160)
+        lbl_name.setMaximumWidth(225)
+        lbl_name.setToolTip(name)
 
         lbl_meta = QLabel(meta)
         lbl_meta.setStyleSheet(
-            "background:transparent;font-size:11px;color:#8A9A8A;"
+            "background:transparent;font-size:12px;color:#8A9A8A;"
         )
         text_l.addWidget(lbl_name)
         text_l.addWidget(lbl_meta)
@@ -153,6 +161,8 @@ class RecentItem(QWidget):
         lay.addWidget(text_w, 1)
         lay.addWidget(menu_btn)
 
+        for child in self.findChildren(QWidget):
+            child.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self._hovered = False
 
     def enterEvent(self, e):
@@ -168,6 +178,7 @@ class UploadPanel(QWidget):
     Fixed width of 280px to avoid overflowing small windows.
     """
 
+    documentRequested = Signal(int)
     pdfRequested   = Signal()
     imageRequested = Signal()
     textRequested  = Signal()
@@ -175,7 +186,7 @@ class UploadPanel(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(280)
+        self.setFixedWidth(350)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         # Drop shadow
@@ -186,7 +197,7 @@ class UploadPanel(QWidget):
         self.setGraphicsEffect(shadow)
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(18, 16, 18, 18)
+        root.setContentsMargins(22, 22, 22, 22)
         root.setSpacing(0)
 
         # ── Header ─────────────────────────────────────────────────────────────
@@ -194,11 +205,11 @@ class UploadPanel(QWidget):
         hdr.setSpacing(0)
 
         title_col = QVBoxLayout()
-        title_col.setSpacing(3)
+        title_col.setSpacing(18)
 
         lbl_title = QLabel("Upload Content")
         lbl_title.setStyleSheet(
-            "color:#1A1C1A;font-size:16px;font-weight:700;background:transparent;"
+            "color:#1A1C1A;font-size:22px;font-weight:700;background:transparent;"
         )
 
         lbl_sub = QLabel("Choose what you want to add\nto your document:")
@@ -215,7 +226,7 @@ class UploadPanel(QWidget):
         close_btn.setCursor(Qt.PointingHandCursor)
         close_btn.setStyleSheet(
             "QPushButton{background:transparent;border-radius:7px;"
-            "color:#8A9A8A;font-size:14px;border:none;}"
+            "color:#8A9A8A;font-size:16px;border:none;}"
             "QPushButton:hover{background:#EDD89A;color:#1A1C1A;}"
         )
         close_btn.clicked.connect(self.closeRequested)
@@ -244,19 +255,20 @@ class UploadPanel(QWidget):
         self.card_txt.clicked.connect(self.textRequested)
 
         root.addWidget(self.card_pdf)
-        root.addSpacing(7)
+        root.addSpacing(14)
         root.addWidget(self.card_img)
-        root.addSpacing(7)
+        root.addSpacing(14)
         root.addWidget(self.card_txt)
-        root.addSpacing(18)
+        root.addSpacing(24)
 
         # ── Recent uploads ─────────────────────────────────────────────────────
         recent_hdr = QHBoxLayout()
         lbl_recent = QLabel("Recent Uploads")
         lbl_recent.setStyleSheet(
-            "color:#1A1C1A;font-size:14px;font-weight:700;background:transparent;"
+            "color:#1A1C1A;font-size:22px;font-weight:700;background:transparent;"
         )
-        btn_see = QPushButton("See all")
+        btn_see = QPushButton("Recent")
+        btn_see.setEnabled(False)
         btn_see.setCursor(Qt.PointingHandCursor)
         btn_see.setStyleSheet(
             "QPushButton{background:transparent;color:#D4A017;"
@@ -270,11 +282,7 @@ class UploadPanel(QWidget):
         root.addSpacing(6)
 
         # Items with distinct badge colours (red, green, grey like reference)
-        self._items = [
-            RecentItem("📄", "DBMS_Chapter1.pdf",    "PDF  •  2 hours ago",  "#E05555"),
-            RecentItem("🖼", "ER_Diagram.jpg",        "Image  •  1 day ago",  "#4CAF82"),
-            RecentItem("📝", "Notes - Normalization", "Text  •  2 days ago",  "#8A9A8A"),
-        ]
+        self._items = []
         for item in self._items:
             root.addWidget(item)
 
@@ -286,12 +294,12 @@ class UploadPanel(QWidget):
         p.setRenderHint(QPainter.Antialiasing)
         path = QPainterPath()
         path.addRoundedRect(self.rect(), 16, 16)
-        p.fillPath(path, QColor("#FFF8EC"))
+        p.fillPath(path, QColor("#FCF1D8"))
         p.end()
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
-    def refresh_recent(self, items: list[tuple[str, str, str]]):
+    def refresh_recent(self, items: list[tuple[str, str, str, int]]):
         """
         Refresh the recent items list.
         items: list of (icon, name, meta) tuples.
@@ -305,10 +313,11 @@ class UploadPanel(QWidget):
         badge_colors = {"📄": "#E05555", "🖼": "#4CAF82", "📝": "#8A9A8A"}
         layout = self.layout()
 
-        for icon, name, meta in items:
+        for icon, name, meta, document_id in items:
             color = badge_colors.get(icon, "#F0C94C")
             item  = RecentItem(icon, name, meta, badge_color=color)
             # Insert before the final stretch
+            item.clicked.connect(lambda doc_id=document_id: self.documentRequested.emit(doc_id))
             idx = layout.count() - 1
             layout.insertWidget(idx, item)
             self._items.append(item)

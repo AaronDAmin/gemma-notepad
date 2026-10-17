@@ -84,6 +84,9 @@ class MainWindow(QMainWindow):
         self.workspace.pdfUploadRequested.connect(self._import_pdf)
         self.workspace.imageUploadRequested.connect(self._import_image)
         self.workspace.textUploadRequested.connect(self._new_text_note)
+        self.workspace.upload_panel.documentRequested.connect(self._open_recent)
+        self.workspace.text_editor.btn_save.clicked.connect(self._save_note)
+        self.workspace.text_editor.editor.textChanged.connect(self._remember_note)
 
         # Text selection → AI popup
         self.workspace.pdf_viewer.textSelected.connect(self._on_text_selected)
@@ -94,10 +97,7 @@ class MainWindow(QMainWindow):
     def _init_tabs(self):
         self._workspaces: dict[int, dict] = {}
         self._next_tab_id = 1
-        for name in ("Cours 01", "Cours 02", "Notes"):
-            self._create_tab(name, activate=(name == "Cours 01"))
-        self.workspace.show_pdf()
-        self._workspaces[1]["mode"] = "pdf"
+        self.workspace.show_empty()
 
     def _load_settings(self):
         self._active_model = settings_repo.get("active_model", "")
@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
 
     def _refresh_recent(self):
         recent = doc_repo.get_recent(limit=8)
+        self._recent_documents = {d.id: d for d in recent}
         items = []
         for d in recent:
             if d.doc_type == DocumentType.PDF:
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
                 icon, meta = "🖼", f"Image  •  {d.name}"
             else:
                 icon, meta = "📝", f"Text  •  {d.name}"
-            items.append((icon, d.name, meta))
+            items.append((icon, d.name, meta, d.id))
         self.workspace.upload_panel.refresh_recent(items)
 
     # ── Tab management ─────────────────────────────────────────────────────────
@@ -133,23 +134,63 @@ class MainWindow(QMainWindow):
         ws   = self._workspaces.get(tab_id, {})
         mode = ws.get("mode", "empty")
         if mode == "pdf":
+            if ws.get("path"):
+                self.workspace.pdf_viewer.load_pdf(ws["path"], doc_name=ws["name"])
             self.workspace.show_pdf()
         elif mode == "image":
+            if ws.get("path"):
+                self.workspace.image_viewer.load_image(ws["path"])
             self.workspace.show_image()
         elif mode == "text":
+            self.workspace.text_editor.set_content(ws.get("content", ""))
             self.workspace.show_text()
         else:
             self.workspace.show_empty()
         self.workspace.hide_upload_panel()
 
     def _on_tab_closed(self, tab_id: int):
-        if self.tab_bar.count() <= 1:
-            self.workspace.show_empty()
-            return
         self._workspaces.pop(tab_id, None)
         self.tab_bar.remove_tab(tab_id)
+        if not self.tab_bar.count():
+            self.workspace.show_empty()
 
-    # ── Sidebar handlers ───────────────────────────────────────────────────────
+    def _ensure_tab(self):
+        if self.tab_bar.active_tab_id() is None:
+            self._on_new_tab()
+
+    def _open_recent(self, document_id):
+        doc = self._recent_documents.get(document_id)
+        if doc is None:
+            return
+        if doc.doc_type != DocumentType.TEXT and not os.path.isfile(doc.file_path or ""):
+            QMessageBox.warning(self, "Document unavailable", "This file has been moved or deleted.")
+            return
+        for tab_id, state in self._workspaces.items():
+            if state.get("document_id") == document_id:
+                self.tab_bar.set_active_tab(tab_id)
+                self.workspace.hide_upload_panel()
+                return
+        tab_id = self._create_tab(doc.name, activate=False)
+        self._workspaces[tab_id].update(
+            mode=doc.doc_type.value, path=doc.file_path,
+            content=doc.content or "", document_id=doc.id, document=doc,
+        )
+        self.tab_bar.set_active_tab(tab_id)
+
+    def _remember_note(self):
+        state = self._workspaces.get(self.tab_bar.active_tab_id(), {})
+        if state.get("mode") == "text":
+            state["content"] = self.workspace.text_editor.get_content()
+
+    def _save_note(self):
+        state = self._workspaces.get(self.tab_bar.active_tab_id(), {})
+        if state.get("mode") != "text":
+            return
+        doc = state.get("document")
+        if doc is not None:
+            doc.content = self.workspace.text_editor.get_content()
+            doc_repo.save(doc)
+            self._refresh_recent()
 
     def _on_select_tool(self):
         if self.workspace.current_mode() == 4:
@@ -192,6 +233,7 @@ class MainWindow(QMainWindow):
         )
         if not path:
             return
+        self._ensure_tab()
         self.workspace.hide_upload_panel()
         self.workspace.show_pdf()
 
@@ -212,7 +254,9 @@ class MainWindow(QMainWindow):
             content=None,
             page_count=self.workspace.pdf_viewer._total_pages,
         )
-        doc_repo.save(doc)
+        doc.id = doc_repo.save(doc)
+        if active_id in self._workspaces:
+            self._workspaces[active_id].update(document_id=doc.id, document=doc, name=doc.name)
         self._refresh_recent()
 
     def _import_image(self):
@@ -222,6 +266,7 @@ class MainWindow(QMainWindow):
         )
         if not path:
             return
+        self._ensure_tab()
         self.workspace.hide_upload_panel()
         self.workspace.show_image()
         self.workspace.image_viewer.load_image(path)
@@ -238,10 +283,14 @@ class MainWindow(QMainWindow):
             name=name, doc_type=DocumentType.IMAGE,
             file_path=path, content=None,
         )
-        doc_repo.save(doc)
+        doc.id = doc_repo.save(doc)
+        if active_id in self._workspaces:
+            self._workspaces[active_id].update(document_id=doc.id, document=doc, name=doc.name)
         self._refresh_recent()
 
     def _new_text_note(self):
+        self._ensure_tab()
+        self.workspace.text_editor.set_content("")
         self.workspace.hide_upload_panel()
         self.workspace.show_text()
         active_id = self.tab_bar.active_tab_id()
@@ -254,7 +303,9 @@ class MainWindow(QMainWindow):
             name="New Note", doc_type=DocumentType.TEXT,
             file_path=None, content="",
         )
-        doc_repo.save(doc)
+        doc.id = doc_repo.save(doc)
+        if active_id in self._workspaces:
+            self._workspaces[active_id].update(document_id=doc.id, document=doc, name=doc.name)
         self._refresh_recent()
 
     # ── AI popup ───────────────────────────────────────────────────────────────
