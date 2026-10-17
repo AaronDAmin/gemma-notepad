@@ -25,7 +25,7 @@ WINDOW_DEFAULT_H  = 760
 PDF_MAX_PAGES = 20
 
 # ── Ollama ─────────────────────────────────────────────────────────────────────
-OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+OLLAMA_BASE_URL = "http://10.10.248.23:11434"
 OLLAMA_TIMEOUT  = 120  # seconds
 
 # ── Zoom presets ───────────────────────────────────────────────────────────────

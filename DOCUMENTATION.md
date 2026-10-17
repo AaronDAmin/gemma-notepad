@@ -1,70 +1,70 @@
 MUSTARD — AI-Powered Study Notepad
-Votre assistant d'étude intelligent, entièrement local
-🎯 C'est quoi MUSTARD ?
-MUSTARD est une application de bureau conçue pour les étudiants qui veulent étudier plus intelligemment. Elle réunit en un seul endroit tout ce dont vous avez besoin : lire vos cours en PDF, prendre des notes, demander des explications à une IA, et vous tester avec des quiz générés automatiquement.
+Your intelligent study assistant, fully local
+🎯 What is MUSTARD?
+MUSTARD is a desktop application designed for students who want to study smarter. It brings together in one place everything you need: read your PDF course materials, take notes, ask an AI for explanations, and test yourself with automatically generated quizzes.
 
-Tout fonctionne hors ligne, sur votre ordinateur. Aucune donnée ne quitte votre machine.
+Everything runs offline, on your computer. No data ever leaves your machine.
 
-🚀 Le problème qu'on résout
-Quand on étudie, on jongle entre plusieurs outils :
+🚀 The problem we solve
+When studying, you juggle between several tools:
 
-Un lecteur PDF pour les cours
-Une appli de notes
-Google ou ChatGPT pour les explications
-Des sites de quiz pour se tester
-MUSTARD regroupe tout ça en une seule application, avec une IA locale qui comprend réellement le contenu de vos documents.
+A PDF reader for course materials
+A notes app
+Google or ChatGPT for explanations
+Quiz websites to test yourself
+MUSTARD brings all of that into a single application, with a local AI that actually understands the content of your documents.
 
-✨ Ce que vous pouvez faire
-📄 Lire vos cours
-Importez n'importe quel PDF directement dans l'application. Naviguez entre les pages, zoomez, marquez vos positions.
+✨ What you can do
+📄 Read your course materials
+Import any PDF directly into the application. Navigate between pages, zoom, and mark your positions.
 
-🤖 Demander des explications à l'IA
-Sélectionnez n'importe quel passage de texte → une bulle apparaît → cliquez "Explain with AI". L'IA explique le concept en utilisant le contexte de votre document, pas une définition générique tirée d'internet.
+🤖 Ask the AI for explanations
+Select any passage of text → a bubble appears → click "Explain with AI". The AI explains the concept using the context of your document, not a generic definition pulled from the internet.
 
-📝 Prendre des notes
-Un éditeur de texte intégré pour écrire vos résumés et annotations, sauvegardés automatiquement.
+📝 Take notes
+A built-in text editor to write your summaries and annotations, saved automatically.
 
-🧠 Générer des quiz
-En un clic, l'application génère des QCM à partir de votre cours. Vous choisissez :
+🧠 Generate quizzes
+With one click, the application generates multiple-choice questions from your course material. You choose:
 
-Le nombre de questions
-La difficulté
-Le type (mémorisation, compréhension, application)
-Après le quiz, vous voyez vos erreurs avec les explications et les pages sources.
+The number of questions
+The difficulty
+The type (memorization, comprehension, application)
+After the quiz, you see your mistakes along with explanations and the source pages.
 
-🖼️ Importer des images
-Schémas, diagrammes, captures — tout s'affiche dans le même espace de travail.
+🖼️ Import images
+Diagrams, schematics, screenshots — everything displays in the same workspace.
 
-🔒 Pourquoi c'est différent
-Autres outils	MUSTARD
-Envoient vos données sur des serveurs	100% local, rien ne sort
-Nécessitent un abonnement	Gratuit, open source
-IA générique qui ne connaît pas votre cours	IA qui lit et comprend VOS documents
-4 applications différentes	Tout en un seul endroit
-🎨 Le design MUSTARD
-L'interface est pensée pour être agréable à utiliser pendant de longues sessions d'étude :
+🔒 Why it's different
+Other tools	MUSTARD
+Send your data to servers	100% local, nothing leaves
+Require a subscription	Free, open source
+Generic AI that doesn't know your course material	AI that reads and understands YOUR documents
+4 different applications	Everything in one place
+🎨 The MUSTARD design
+The interface is designed to be pleasant to use during long study sessions:
 
-Palette chaude — tons moutarde et crème qui fatiguent moins les yeux que le blanc pur
-Mise en page claire — trois zones simples : barre de documents, barre latérale d'outils, espace de travail central
-Zéro distraction — pas de publicités, pas de notifications, pas de compte à créer
-🛣️ Feuille de route
-Le projet est développé en 5 phases :
+Warm palette — mustard and cream tones that are less tiring on the eyes than pure white
+Clear layout — three simple areas: document bar, tool sidebar, central workspace
+Zero distraction — no ads, no notifications, no account to create
+🛣️ Roadmap
+The project is being developed in 5 phases:
 
-Phase	Description	Statut
-1 — Interface	Design complet de l'application	✅ Terminé
-2 — Documents	Lecture PDF, images, éditeur de notes	🔄 En cours
-3 — IA	Explications et questions via l'IA locale	📅 Prévu
-4 — Quiz	Génération et évaluation de QCM	📅 Prévu
-5 — Finitions	Packaging, performances, expérience finale	📅 Prévu
-💻 Sur quoi ça tourne ?
-Système : Windows (Mac et Linux à venir)
-IA : Ollama — un moteur d'IA local gratuit, vos modèles restent sur votre machine
-Stockage : Tout est sauvegardé localement (documents, notes, historique de quiz)
-Connexion internet : Non requise
-L'application s'adapte à des machines modestes — elle a été optimisée pour tourner confortablement sur un ordinateur portable standard.
+Phase	Description	Status
+1 — Interface	Complete application design	✅ Done
+2 — Documents	PDF reading, images, notes editor	🔄 In progress
+3 — AI	Explanations and questions via local AI	📅 Planned
+4 — Quiz	MCQ generation and grading	📅 Planned
+5 — Polish	Packaging, performance, final experience	📅 Planned
+💻 What it runs on
+System: Windows (Mac and Linux coming soon)
+AI: Ollama — a free local AI engine, your models stay on your machine
+Storage: Everything is saved locally (documents, notes, quiz history)
+Internet connection: Not required
+The application adapts to modest machines — it was optimized to run comfortably on a standard laptop.
 
-👥 Pour qui ?
-Étudiants qui veulent comprendre leurs cours en profondeur
-Autodidactes qui apprennent depuis des ressources PDF
-Toute personne soucieuse de garder ses données privées
-MUSTARD — Étudier plus vite, comprendre plus profond.
+👥 Who is it for?
+Students who want to understand their course material in depth
+Self-learners who study from PDF resources
+Anyone concerned about keeping their data private
+MUSTARD — Study faster, understand deeper.
