@@ -48,3 +48,4 @@ study-notepad/
     ├── icons/
     └── styles/                 QSS theme + color constants
 ```
+Project slide link "https://docs.google.com/presentation/d/1Ee27IsJmRhqqJkMAChK5tOI198ZXF4NM/edit?usp=sharing&ouid=115773920605038033504&rtpof=true&sd=true"
