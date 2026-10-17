@@ -1,0 +1,540 @@
+/* ── MUSTARD Global Theme ─────────────────────────────────────────────────────
+   Loaded once at startup; all widget-specific overrides use objectName or class.
+*/
+
+/* ── Reset / Base ─────────────────────────────────────────────────────────── */
+QWidget {
+    font-family: "Segoe UI", "Inter", "SF Pro Display", sans-serif;
+    font-size: 13px;
+    color: #F0EDE8;
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+/* Prevent Qt from painting blue link colours on any QLabel */
+QLabel {
+    color: inherit;
+}
+
+QMainWindow, QMainWindow > QWidget {
+    background-color: #282B28;
+}
+
+/* ── Scrollbars ───────────────────────────────────────────────────────────── */
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #3D413D;
+    border-radius: 4px;
+    min-height: 30px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #D4A017;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 8px;
+    margin: 0;
+}
+QScrollBar::handle:horizontal {
+    background: #3D413D;
+    border-radius: 4px;
+    min-width: 30px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #D4A017;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+#sidebar {
+    background-color: #282B28;
+    min-width: 78px;
+    max-width: 78px;
+}
+
+#sidebarBtn {
+    background-color: transparent;
+    border-radius: 12px;
+    color: #B0B8B0;
+    padding: 8px 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+#sidebarBtn:hover {
+    background-color: #343834;
+    color: #F0EDE8;
+}
+#sidebarBtn[active="true"] {
+    background-color: #F0C94C;
+    color: #1A1C1A;
+    font-weight: 600;
+}
+
+#sidebarSeparator {
+    background-color: #3D413D;
+    max-height: 1px;
+    min-height: 1px;
+}
+
+#sidebarBottomBtn {
+    background-color: transparent;
+    border-radius: 10px;
+    color: #8A9A8A;
+    padding: 6px;
+}
+#sidebarBottomBtn:hover {
+    background-color: #343834;
+    color: #F0EDE8;
+}
+
+/* ── Tab Bar ──────────────────────────────────────────────────────────────── */
+#tabBarWidget {
+    background-color: #F0C94C;
+    min-height: 52px;
+    max-height: 52px;
+}
+
+#docTab {
+    background-color: #343834;
+    border-radius: 10px;
+    color: #B0B8B0;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 34px;
+}
+#docTab:hover {
+    background-color: #3D413D;
+    color: #F0EDE8;
+}
+#docTab[active="true"] {
+    background-color: #F0C94C;
+    color: #1A1C1A;
+    font-weight: 600;
+}
+
+#tabCloseBtn {
+    background-color: transparent;
+    border-radius: 8px;
+    color: #8A9A8A;
+    font-size: 12px;
+    padding: 2px 4px;
+    max-width: 18px;
+    max-height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+}
+#tabCloseBtn:hover {
+    background-color: rgba(0,0,0,0.15);
+    color: #1A1C1A;
+}
+
+#newTabBtn {
+    background-color: #E8B93A;
+    border-radius: 10px;
+    color: #1A1C1A;
+    font-size: 20px;
+    font-weight: 300;
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0;
+}
+#newTabBtn:hover {
+    background-color: #D4A017;
+}
+
+/* ── Central Workspace ────────────────────────────────────────────────────── */
+#workspaceContainer {
+    background-color: #282B28;
+    padding: 12px 12px 12px 8px;
+}
+
+#workspacePanel {
+    background-color: #FFF8EC;
+    border-radius: 16px;
+    color: #1A1C1A;
+}
+
+/* ── PDF Toolbar ──────────────────────────────────────────────────────────── */
+#pdfToolbar {
+    background-color: #FFF8EC;
+    border-bottom: 1px solid #EDD89A;
+    min-height: 48px;
+    max-height: 48px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 0 12px;
+}
+
+#pdfToolBtn {
+    background-color: transparent;
+    border-radius: 8px;
+    color: #4A4E4A;
+    padding: 5px;
+    font-size: 16px;
+    min-width: 30px;
+    min-height: 30px;
+}
+#pdfToolBtn:hover {
+    background-color: #F7E7B5;
+    color: #1A1C1A;
+}
+#pdfToolBtn:pressed {
+    background-color: #EDD89A;
+}
+
+#pageInputBox {
+    background-color: #F7E7B5;
+    border: 1px solid #EDD89A;
+    border-radius: 6px;
+    color: #1A1C1A;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 8px;
+    min-width: 36px;
+    max-width: 36px;
+    text-align: center;
+}
+
+#pageLabel {
+    color: #8A9A8A;
+    font-size: 13px;
+}
+
+#zoomCombo {
+    background-color: #F7E7B5;
+    border: 1px solid #EDD89A;
+    border-radius: 6px;
+    color: #1A1C1A;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 3px 8px;
+    min-width: 70px;
+}
+#zoomCombo::drop-down {
+    border: none;
+    width: 16px;
+}
+#zoomCombo QAbstractItemView {
+    background-color: #FFF8EC;
+    border: 1px solid #EDD89A;
+    border-radius: 6px;
+    color: #1A1C1A;
+    selection-background-color: #F0C94C;
+}
+
+/* ── PDF Content Area ─────────────────────────────────────────────────────── */
+#pdfScrollArea {
+    background-color: #FFF8EC;
+    border: none;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+#pdfScrollArea > QWidget {
+    background-color: #FFF8EC;
+}
+#pdfPageWidget {
+    background-color: #FFF8EC;
+}
+
+/* ── AI Popup ─────────────────────────────────────────────────────────────── */
+#aiContextPopup {
+    background-color: #282B28;
+    border-radius: 12px;
+    border: 1px solid #3D413D;
+}
+
+#aiPopupBtn {
+    background-color: transparent;
+    border-radius: 8px;
+    color: #F0EDE8;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+}
+#aiPopupBtn:hover {
+    background-color: #343834;
+}
+
+#aiPopupSeparator {
+    background-color: #3D413D;
+    max-width: 1px;
+    min-width: 1px;
+}
+
+#aiPopupMenu {
+    background-color: transparent;
+    border-radius: 8px;
+    color: #8A9A8A;
+    font-size: 16px;
+    padding: 4px 8px;
+}
+#aiPopupMenu:hover {
+    background-color: #343834;
+    color: #F0EDE8;
+}
+
+/* ── Upload Dialog ────────────────────────────────────────────────────────── */
+#uploadPanel {
+    background-color: #FFF8EC;
+    border-radius: 16px;
+    border: 1px solid #EDD89A;
+}
+
+#uploadPanelTitle {
+    color: #1A1C1A;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+#uploadPanelSubtitle {
+    color: #4A4E4A;
+    font-size: 13px;
+}
+
+#uploadCloseBtn {
+    background-color: transparent;
+    border-radius: 8px;
+    color: #8A9A8A;
+    font-size: 18px;
+    padding: 2px 6px;
+}
+#uploadCloseBtn:hover {
+    background-color: #F7E7B5;
+    color: #1A1C1A;
+}
+
+#uploadOptionCard {
+    background-color: #F0C94C;
+    border-radius: 12px;
+    color: #1A1C1A;
+    padding: 14px 16px;
+    min-height: 56px;
+}
+#uploadOptionCard:hover {
+    background-color: #E8B93A;
+}
+#uploadOptionCard:pressed {
+    background-color: #D4A017;
+}
+
+#uploadOptionCardSecondary {
+    background-color: #F7E7B5;
+    border-radius: 12px;
+    color: #1A1C1A;
+    padding: 14px 16px;
+    min-height: 56px;
+}
+#uploadOptionCardSecondary:hover {
+    background-color: #EDD89A;
+}
+
+#uploadOptionTitle {
+    color: #1A1C1A;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#uploadOptionDesc {
+    color: #4A4E4A;
+    font-size: 12px;
+}
+
+#uploadSectionLabel {
+    color: #1A1C1A;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#uploadSeeAllBtn {
+    background-color: transparent;
+    color: #D4A017;
+    font-size: 13px;
+    font-weight: 600;
+}
+#uploadSeeAllBtn:hover {
+    color: #F0C94C;
+}
+
+#recentItem {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 6px 4px;
+}
+#recentItem:hover {
+    background-color: #F7E7B5;
+}
+
+#recentItemTitle {
+    color: #1A1C1A;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#recentItemMeta {
+    color: #8A9A8A;
+    font-size: 11px;
+}
+
+/* ── Quiz View ────────────────────────────────────────────────────────────── */
+#quizContainer {
+    background-color: #FFF8EC;
+    border-radius: 16px;
+}
+
+#quizTitle {
+    color: #D4A017;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+#quizSubtitle {
+    color: #4A4E4A;
+    font-size: 14px;
+}
+
+#quizConfigCard {
+    background-color: #F7E7B5;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+#primaryBtn {
+    background-color: #F0C94C;
+    border-radius: 10px;
+    color: #1A1C1A;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 24px;
+    min-height: 40px;
+}
+#primaryBtn:hover {
+    background-color: #E8B93A;
+}
+#primaryBtn:pressed {
+    background-color: #D4A017;
+}
+
+#secondaryBtn {
+    background-color: #F7E7B5;
+    border-radius: 10px;
+    color: #1A1C1A;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 24px;
+    min-height: 40px;
+}
+#secondaryBtn:hover {
+    background-color: #EDD89A;
+}
+
+/* ── Text Editor ──────────────────────────────────────────────────────────── */
+#textEditor {
+    background-color: #FFF8EC;
+    border: none;
+    color: #1A1C1A;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 20px 30px;
+    selection-background-color: #F0C94C;
+    selection-color: #1A1C1A;
+}
+
+/* ── Image Viewer ─────────────────────────────────────────────────────────── */
+#imageScrollArea {
+    background-color: #F7E7B5;
+    border: none;
+    border-radius: 0 0 16px 16px;
+}
+
+/* ── Welcome / Empty State ────────────────────────────────────────────────── */
+#emptyStateTitle {
+    color: #D4A017;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+#emptyStateSubtitle {
+    color: #8A9A8A;
+    font-size: 14px;
+}
+
+#emptyStateBtn {
+    background-color: #F0C94C;
+    border-radius: 10px;
+    color: #1A1C1A;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 28px;
+}
+#emptyStateBtn:hover {
+    background-color: #E8B93A;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────────── */
+QToolTip {
+    background-color: #343834;
+    border: 1px solid #3D413D;
+    border-radius: 6px;
+    color: #F0EDE8;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+/* ── ComboBox ─────────────────────────────────────────────────────────────── */
+QComboBox {
+    background-color: #343834;
+    border: 1px solid #3D413D;
+    border-radius: 8px;
+    color: #F0EDE8;
+    padding: 5px 10px;
+}
+QComboBox:hover {
+    border-color: #D4A017;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+QComboBox QAbstractItemView {
+    background-color: #343834;
+    border: 1px solid #3D413D;
+    border-radius: 8px;
+    color: #F0EDE8;
+    selection-background-color: #D4A017;
+    selection-color: #1A1C1A;
+}
+
+/* ── SpinBox ──────────────────────────────────────────────────────────────── */
+QSpinBox {
+    background-color: #F7E7B5;
+    border: 1px solid #EDD89A;
+    border-radius: 8px;
+    color: #1A1C1A;
+    padding: 5px 10px;
+}
+
+/* ── Splitter ─────────────────────────────────────────────────────────────── */
+QSplitter::handle {
+    background-color: #3D413D;
+    width: 1px;
+}
