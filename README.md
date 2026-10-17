@@ -14,6 +14,7 @@ pip install -r requirements.txt
 
 # 3. Run the application
 python main.py
+#python3 main.py on lunux
 ```
 
 ## Requirements
