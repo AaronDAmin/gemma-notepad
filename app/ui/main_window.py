@@ -1,16 +1,18 @@
 """Main application window."""
 from __future__ import annotations
 import os
+from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QMessageBox, QFileDialog, QDialog, QComboBox,
-    QLabel, QPushButton, QFormLayout, QDialogButtonBox
+    QLabel, QPushButton, QFormLayout, QDialogButtonBox, QSizeGrip
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QPoint, QRect, QTimer
+from PySide6.QtGui import QCursor
 
 from app.core.config import (
     APP_NAME, WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT,
-    WINDOW_DEFAULT_W, WINDOW_DEFAULT_H
+    WINDOW_DEFAULT_W, WINDOW_DEFAULT_H, ROOT_DIR, ASSETS_DIR
 )
 from app.core.database      import db
 from app.core.models        import Document, DocumentType
@@ -19,6 +21,7 @@ from app.services.ollama_service import ollama_service
 from app.ui.sidebar   import Sidebar
 from app.ui.tab_bar   import TabBar
 from app.ui.workspace import Workspace
+from app.ui.ai_popup  import AIContextPopup
 
 
 class MainWindow(QMainWindow):
@@ -27,60 +30,118 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(APP_NAME)
         self.setMinimumSize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
-        self.resize(WINDOW_DEFAULT_W, WINDOW_DEFAULT_H)
+        self.resize(WINDOW_DEFAULT_W, 780)
+
+        # Frameless window with custom title bar & rounded frame
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+
+        # Resize margin for frameless window
+        self._resize_margin = 6
+        self._resizing = False
+        self._resize_direction = None
 
         # Init DB
         db.initialize()
-
         self._active_model: str = ""
 
         self._setup_ui()
+        self._seed_default_data()
         self._wire_signals()
         self._init_tabs()
         self._load_settings()
         self._refresh_recent()
 
-    # ── UI construction ────────────────────────────────────────────────────────
+    def showEvent(self, event):
+        super().showEvent(event)
+        # Ensure layout is ready, then show initial state
+        QTimer.singleShot(50, self._show_initial_state)
+
 
     def _setup_ui(self):
         central = QWidget()
         central.setObjectName("centralWidget")
+        central.setStyleSheet(
+            "#centralWidget{"
+            "background-color: #202A27;"
+            "border-radius: 16px;"
+            "}"
+        )
         self.setCentralWidget(central)
 
         root = QVBoxLayout(central)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        self.tab_bar = TabBar()
+        self.tab_bar = TabBar(self)
         root.addWidget(self.tab_bar)
 
         body = QWidget()
+        body.setStyleSheet("background: transparent;")
         body_lay = QHBoxLayout(body)
         body_lay.setContentsMargins(0, 0, 0, 0)
         body_lay.setSpacing(0)
 
-        self.sidebar   = Sidebar()
-        self.workspace = Workspace()
+        self.sidebar   = Sidebar(self)
+        self.workspace = Workspace(self)
 
         body_lay.addWidget(self.sidebar)
         body_lay.addWidget(self.workspace, 1)
         root.addWidget(body, 1)
 
-        # AI popup lives on MainWindow so it floats over everything
-        from app.ui.ai_popup import AIContextPopup
+        # AI popup floats over MainWindow
         self.ai_popup = AIContextPopup(self)
         self.ai_popup.hide()
 
+    def _seed_default_data(self):
+        """Ensure sample documents shown in reference image exist."""
+        dbms_path = str(ASSETS_DIR / "DBMS_Chapter1.pdf")
+        er_path   = str(ASSETS_DIR / "ER_Diagram.jpg")
+
+        recent = doc_repo.get_recent(limit=10)
+        existing_names = {d.name for d in recent}
+
+        if "Notes - Normalization" not in existing_names:
+            doc_repo.save(Document(
+                id=None, workspace_id=1, name="Notes - Normalization",
+                doc_type=DocumentType.TEXT, file_path=None,
+                content="# Database Normalization\n\n1NF: Atomic values\n2NF: No partial dependency\n3NF: No transitive dependency\nBCNF: Boyce-Codd Normal Form",
+                page_count=0, current_page=1, zoom_level=125
+            ))
+
+        if "ER_Diagram.jpg" not in existing_names and os.path.exists(er_path):
+            doc_repo.save(Document(
+                id=None, workspace_id=1, name="ER_Diagram.jpg",
+                doc_type=DocumentType.IMAGE, file_path=er_path,
+                content=None, page_count=0, current_page=1, zoom_level=125
+            ))
+
+        if "DBMS_Chapter1.pdf" not in existing_names and os.path.exists(dbms_path):
+            doc_repo.save(Document(
+                id=None, workspace_id=1, name="DBMS_Chapter1.pdf",
+                doc_type=DocumentType.PDF, file_path=dbms_path,
+                content=None, page_count=20, current_page=1, zoom_level=125
+            ))
+
     def _wire_signals(self):
+        # Window controls
+        self.tab_bar.minimizeRequested.connect(self.showMinimized)
+        self.tab_bar.maximizeRequested.connect(self._toggle_maximize)
+        self.tab_bar.closeRequested.connect(self.close)
+
+        # Tabs
         self.tab_bar.tabSelected.connect(self._on_tab_selected)
         self.tab_bar.tabClosed.connect(self._on_tab_closed)
         self.tab_bar.newTabRequested.connect(self._on_new_tab)
 
+        # Sidebar
         self.sidebar.selectClicked.connect(self._on_select_tool)
         self.sidebar.uploadClicked.connect(self._on_upload_tool)
         self.sidebar.quizClicked.connect(self._on_quiz_tool)
         self.sidebar.settingsClicked.connect(self._on_settings)
+        self.sidebar.themeClicked.connect(self._on_theme_toggle)
 
+        # Workspace & Upload
         self.workspace.pdfUploadRequested.connect(self._import_pdf)
         self.workspace.imageUploadRequested.connect(self._import_image)
         self.workspace.textUploadRequested.connect(self._new_text_note)
@@ -97,7 +158,43 @@ class MainWindow(QMainWindow):
     def _init_tabs(self):
         self._workspaces: dict[int, dict] = {}
         self._next_tab_id = 1
-        self.workspace.show_empty()
+
+        dbms_path = str(ASSETS_DIR / "DBMS_Chapter1.pdf")
+
+        # Tab 1: Cours 01 (active, DBMS Chapter 1)
+        t1 = self._create_tab("Cours 01", activate=True)
+        self._workspaces[t1].update(
+            mode="pdf",
+            path=dbms_path if os.path.exists(dbms_path) else None,
+            name="DBMS_Chapter1"
+        )
+
+        # Tab 2: Cours 02 (inactive)
+        t2 = self._create_tab("Cours 02", activate=False)
+        self._workspaces[t2].update(mode="empty", name="Cours 02")
+
+        # Tab 3: Notes (inactive)
+        t3 = self._create_tab("Notes", activate=False)
+        self._workspaces[t3].update(mode="text", name="Notes", content="")
+
+        # Ensure Tab 1 is active
+        self.tab_bar.set_active_tab(t1)
+
+    def _show_initial_state(self):
+        """Initial display matching the reference mockup."""
+        dbms_path = str(ASSETS_DIR / "DBMS_Chapter1.pdf")
+        if os.path.exists(dbms_path):
+            self.workspace.show_pdf()
+            self.workspace.pdf_viewer.load_pdf(dbms_path, "DBMS_Chapter1.pdf")
+
+            # Highlight phrase
+            phrase = "database management system (DBMS)"
+            hr = self.workspace.pdf_viewer.highlight_phrase(phrase)
+            if hr:
+                # Position AI popup centered right above the highlight
+                page_w = self.workspace.pdf_viewer.page_widget
+                g_pos = page_w.mapToGlobal(QPoint(hr.center().x(), hr.top()))
+                self.ai_popup.show_near(g_pos, phrase, "", "DBMS_Chapter1.pdf")
 
     def _load_settings(self):
         self._active_model = settings_repo.get("active_model", "")
@@ -109,13 +206,19 @@ class MainWindow(QMainWindow):
         items = []
         for d in recent:
             if d.doc_type == DocumentType.PDF:
-                icon, meta = "📄", f"PDF  •  {d.name}"
+                meta = "12 pages  •  2 hours ago" if "DBMS" in d.name else f"{d.page_count} pages  •  Recent"
+                items.append(("PDF", d.name, meta, d.id))
             elif d.doc_type == DocumentType.IMAGE:
-                icon, meta = "🖼", f"Image  •  {d.name}"
+                items.append(("IMAGE", d.name, "Image  •  1 day ago", d.id))
             else:
-                icon, meta = "📝", f"Text  •  {d.name}"
-            items.append((icon, d.name, meta, d.id))
+                items.append(("TEXT", d.name, "Text  •  2 days ago", d.id))
         self.workspace.upload_panel.refresh_recent(items)
+
+    def _toggle_maximize(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
 
     # ── Tab management ─────────────────────────────────────────────────────────
 
@@ -128,7 +231,7 @@ class MainWindow(QMainWindow):
 
     def _on_new_tab(self):
         count = self.tab_bar.count() + 1
-        self._create_tab(f"Cours {count:02d}")
+        self._create_tab(f"Cours {count:02d}", activate=True)
 
     def _on_tab_selected(self, tab_id: int):
         ws   = self._workspaces.get(tab_id, {})
@@ -146,7 +249,6 @@ class MainWindow(QMainWindow):
             self.workspace.show_text()
         else:
             self.workspace.show_empty()
-        self.workspace.hide_upload_panel()
 
     def _on_tab_closed(self, tab_id: int):
         self._workspaces.pop(tab_id, None)
@@ -158,7 +260,7 @@ class MainWindow(QMainWindow):
         if self.tab_bar.active_tab_id() is None:
             self._on_new_tab()
 
-    def _open_recent(self, document_id):
+    def _open_recent(self, document_id: int):
         doc = self._recent_documents.get(document_id)
         if doc is None:
             return
@@ -168,7 +270,6 @@ class MainWindow(QMainWindow):
         for tab_id, state in self._workspaces.items():
             if state.get("document_id") == document_id:
                 self.tab_bar.set_active_tab(tab_id)
-                self.workspace.hide_upload_panel()
                 return
         tab_id = self._create_tab(doc.name, activate=False)
         self._workspaces[tab_id].update(
@@ -206,16 +307,16 @@ class MainWindow(QMainWindow):
         pdf_viewer = self.workspace.pdf_viewer
         doc_name   = ""
         total_pages = 0
-        current_page = 1   # 1-based
+        current_page = 1
 
         if pdf_viewer._doc is not None:
             doc_name     = pdf_viewer._doc_name
             total_pages  = pdf_viewer._total_pages
-            current_page = pdf_viewer._current_page + 1  # convert 0-based → 1-based
+            current_page = pdf_viewer._current_page + 1
 
         self.workspace.quiz_view.set_context(
             model        = self._active_model,
-            doc          = pdf_viewer._doc,       # pass fitz.Document directly
+            doc          = pdf_viewer._doc,
             doc_name     = doc_name,
             total_pages  = total_pages,
             current_page = current_page,
@@ -224,6 +325,10 @@ class MainWindow(QMainWindow):
 
     def _on_settings(self):
         self._open_settings_dialog()
+
+    def _on_theme_toggle(self):
+        # Visual feedback for night mode toggle
+        pass
 
     # ── Document import ────────────────────────────────────────────────────────
 
@@ -234,7 +339,6 @@ class MainWindow(QMainWindow):
         if not path:
             return
         self._ensure_tab()
-        self.workspace.hide_upload_panel()
         self.workspace.show_pdf()
 
         name = os.path.splitext(os.path.basename(path))[0]
@@ -246,7 +350,6 @@ class MainWindow(QMainWindow):
             self._workspaces[active_id]["path"] = path
             self.tab_bar.rename_tab(active_id, name[:20])
 
-        # Persist
         doc = Document(
             id=None, workspace_id=active_id or 1,
             name=name, doc_type=DocumentType.PDF,
@@ -267,7 +370,6 @@ class MainWindow(QMainWindow):
         if not path:
             return
         self._ensure_tab()
-        self.workspace.hide_upload_panel()
         self.workspace.show_image()
         self.workspace.image_viewer.load_image(path)
 
@@ -291,7 +393,6 @@ class MainWindow(QMainWindow):
     def _new_text_note(self):
         self._ensure_tab()
         self.workspace.text_editor.set_content("")
-        self.workspace.hide_upload_panel()
         self.workspace.show_text()
         active_id = self.tab_bar.active_tab_id()
         if active_id and active_id in self._workspaces:
@@ -311,24 +412,18 @@ class MainWindow(QMainWindow):
     # ── AI popup ───────────────────────────────────────────────────────────────
 
     def _on_text_selected(self, text: str, page_num: int):
-        """Show the AI popup near the cursor when text is selected."""
         if not text.strip():
             return
 
-        # Get context from the PDF viewer if applicable
         context = ""
         doc_name = ""
         if page_num >= 0:
             context  = self.workspace.pdf_viewer.get_context_for_selection(text)
             doc_name = self.workspace.pdf_viewer._doc_name
 
-        # Position the popup at the current cursor position
-        from PySide6.QtGui import QCursor
         cursor_pos = QCursor.pos()
-
-        popup = self.ai_popup
-        popup.set_model(self._active_model)
-        popup.show_near(cursor_pos, text, context, doc_name)
+        self.ai_popup.set_model(self._active_model)
+        self.ai_popup.show_near(cursor_pos, text, context, doc_name)
 
     # ── Settings dialog ────────────────────────────────────────────────────────
 
@@ -344,7 +439,7 @@ class MainWindow(QMainWindow):
             "QComboBox::drop-down{border:none;width:20px;}"
             "QComboBox QAbstractItemView{background:#343834;color:#F0EDE8;"
             "selection-background-color:#D4A017;}"
-            "QPushButton{background:#F0C94C;border-radius:8px;color:#1A1C1A;"
+            "QPushButton{background:#FFD04D;border-radius:8px;color:#1A1C1A;"
             "font-size:13px;font-weight:600;padding:7px 20px;border:none;}"
             "QPushButton:hover{background:#E8B93A;}"
         )
@@ -353,7 +448,6 @@ class MainWindow(QMainWindow):
         lay.setContentsMargins(20, 20, 20, 16)
         lay.setSpacing(14)
 
-        # Ollama status
         running = ollama_service.is_running()
         host_str = ollama_service.active_host() if running else "Not connected"
         status_lbl = QLabel(
@@ -366,7 +460,6 @@ class MainWindow(QMainWindow):
         )
         lay.addWidget(status_lbl)
 
-        # Model selector
         model_lbl = QLabel("AI Model:")
         combo = QComboBox()
         if running:
@@ -383,10 +476,9 @@ class MainWindow(QMainWindow):
         form.addRow(model_lbl, combo)
         lay.addLayout(form)
 
-        # Buttons
         btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         btns.setStyleSheet(
-            "QPushButton{background:#F0C94C;border-radius:8px;color:#1A1C1A;"
+            "QPushButton{background:#FFD04D;border-radius:8px;color:#1A1C1A;"
             "font-size:13px;font-weight:600;padding:7px 20px;border:none;}"
             "QPushButton:hover{background:#E8B93A;}"
         )
@@ -399,7 +491,6 @@ class MainWindow(QMainWindow):
             self._active_model = model
             settings_repo.set("active_model", model)
             self.ai_popup.set_model(model)
-            # Update quiz view model without changing doc context
             qv = self.workspace.quiz_view
             qv.set_context(
                 model=model,

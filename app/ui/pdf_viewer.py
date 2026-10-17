@@ -4,87 +4,142 @@ import pymupdf as fitz
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QLineEdit, QComboBox, QScrollArea, QFrame, QSizePolicy,
-    QMessageBox
+    QMessageBox, QGraphicsDropShadowEffect
 )
-from PySide6.QtCore import Qt, Signal, QRect, QPoint
-from PySide6.QtGui import QPainter, QColor, QPixmap, QPen, QCursor
+from PySide6.QtCore import Qt, Signal, QRect, QPoint, QRectF
+from PySide6.QtGui import QPainter, QColor, QPixmap, QPen, QCursor, QPainterPath
 
 from app.services.pdf_service import pdf_service
+from app.ui.icons import load_svg_pixmap
 
-_TOOL_BTN_SS = (
-    "QPushButton{background:transparent;border-radius:8px;"
-    "color:#4A4E4A;font-size:14px;padding:4px;border:none;}"
-    "QPushButton:hover{background:#EDD89A;color:#1A1C1A;}"
-    "QPushButton:pressed{background:#D4C080;}"
-)
-
-
-# ── Toolbar ────────────────────────────────────────────────────────────────────
 
 class PDFToolbar(QWidget):
     zoomChanged   = Signal(int)
     prevRequested = Signal()
     nextRequested = Signal()
+    searchClicked = Signal()
+    bookClicked   = Signal()
+    bookmarkClicked = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setFixedHeight(56)
-        self.setStyleSheet(
-            "QWidget{background:#FFF8EC;"
-            "border-top-left-radius:16px;border-top-right-radius:16px;}"
-        )
+        self.setFixedHeight(48)
+        self.setStyleSheet("QWidget{background-color: transparent; border: none;}")
 
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(14, 0, 14, 0)
-        lay.setSpacing(2)
+        lay.setContentsMargins(18, 0, 18, 0)
+        lay.setSpacing(6)
+        lay.setAlignment(Qt.AlignVCenter)
 
-        def btn(text, tip, size=18):
+        # ── Left: Document icon ────────────────────────────────────────────────
+        self.doc_icon_lbl = QLabel()
+        self.doc_icon_lbl.setFixedSize(26, 26)
+        self.doc_icon_lbl.setAlignment(Qt.AlignCenter)
+        pix_doc = load_svg_pixmap("doc_icon.svg", 18)
+        self.doc_icon_lbl.setPixmap(pix_doc)
+        lay.addWidget(self.doc_icon_lbl)
+        lay.addSpacing(4)
+
+        # ── Navigation arrows ──────────────────────────────────────────────────
+        def nav_btn(text: str, tip: str) -> QPushButton:
             b = QPushButton(text)
-            b.setFixedSize(32, 32)
+            b.setFixedSize(26, 26)
             b.setCursor(Qt.PointingHandCursor)
             b.setToolTip(tip)
-            b.setStyleSheet(_TOOL_BTN_SS.replace("font-size:14px", f"font-size:{size}px"))
+            b.setStyleSheet(
+                "QPushButton{"
+                "background: transparent; color: #4A4E4A; font-size: 16px; font-weight: 600;"
+                "border: none; border-radius: 6px;"
+                "}"
+                "QPushButton:hover{background-color: #EEDBBA; color: #1A1C1A;}"
+                "QPushButton:pressed{background-color: #DDC8A0;}"
+            )
             return b
 
-        self.btn_prev = btn("‹", "Previous page")
-        self.btn_next = btn("›", "Next page")
+        self.btn_prev = nav_btn("‹", "Previous page")
+        self.btn_next = nav_btn("›", "Next page")
+        lay.addWidget(self.btn_prev)
+        lay.addWidget(self.btn_next)
+        lay.addSpacing(6)
+
+        # ── Page indicator box ─────────────────────────────────────────────────
+        page_box = QWidget()
+        page_box.setFixedHeight(26)
+        page_box.setStyleSheet(
+            "QWidget{"
+            "background-color: #F6ECCF; border: 1px solid #E8DCB8; border-radius: 6px;"
+            "}"
+        )
+        pb_lay = QHBoxLayout(page_box)
+        pb_lay.setContentsMargins(6, 0, 8, 0)
+        pb_lay.setSpacing(4)
 
         self.page_input = QLineEdit("1")
-        self.page_input.setFixedSize(38, 28)
+        self.page_input.setFixedWidth(22)
         self.page_input.setAlignment(Qt.AlignCenter)
         self.page_input.setStyleSheet(
-            "QLineEdit{background:#F7E7B5;border:1px solid #DDC880;"
-            "border-radius:6px;color:#1A1C1A;font-size:13px;font-weight:600;}"
+            "QLineEdit{background: transparent; border: none; color: #1A1C1A; font-size: 12.5px; font-weight: 600;}"
         )
 
-        self.page_total = QLabel("/ 0")
+        self.page_total = QLabel("/ 20")
         self.page_total.setStyleSheet(
-            "color:#8A9A8A;font-size:13px;background:transparent;padding-left:4px;"
+            "color: #8A9A8A; font-size: 12.5px; font-weight: 500; background: transparent;"
         )
 
+        pb_lay.addWidget(self.page_input)
+        pb_lay.addWidget(self.page_total)
+        lay.addWidget(page_box)
+        lay.addSpacing(6)
+
+        # ── Zoom combo ─────────────────────────────────────────────────────────
         self.zoom_combo = QComboBox()
-        self.zoom_combo.setFixedSize(80, 28)
+        self.zoom_combo.setFixedSize(84, 26)
         self.zoom_combo.setStyleSheet(
-            "QComboBox{background:#F7E7B5;border:1px solid #DDC880;"
-            "border-radius:6px;color:#1A1C1A;font-size:13px;font-weight:500;padding:0 8px;}"
-            "QComboBox::drop-down{border:none;width:18px;}"
-            "QComboBox::down-arrow{width:0;height:0;}"
-            "QComboBox QAbstractItemView{background:#FFF8EC;border:1px solid #DDC880;"
-            "border-radius:6px;color:#1A1C1A;selection-background-color:#F0C94C;}"
+            "QComboBox{"
+            "background-color: #F6ECCF; border: 1px solid #E8DCB8; border-radius: 6px;"
+            "color: #1A1C1A; font-size: 12px; font-weight: 500; padding-left: 8px;"
+            "}"
+            "QComboBox::drop-down{border: none; width: 18px;}"
+            "QComboBox::down-arrow{"
+            "image: none; border-left: 4px solid transparent; border-right: 4px solid transparent;"
+            "border-top: 5px solid #4A4E4A; margin-right: 6px;"
+            "}"
+            "QComboBox QAbstractItemView{"
+            "background-color: #FCF6EC; border: 1px solid #E8DCB8; border-radius: 6px;"
+            "color: #1A1C1A; selection-background-color: #FFD04D; selection-color: #1A1C1A;"
+            "}"
         )
         for lvl in [50, 75, 100, 125, 150, 175, 200]:
             self.zoom_combo.addItem(f"{lvl}%", lvl)
         self.zoom_combo.setCurrentText("125%")
-
-        lay.addWidget(self.btn_prev)
-        lay.addWidget(self.btn_next)
-        lay.addSpacing(8)
-        lay.addWidget(self.page_input)
-        lay.addWidget(self.page_total)
-        lay.addSpacing(10)
         lay.addWidget(self.zoom_combo)
-        lay.addStretch()
+
+        lay.addStretch(1)
+
+        # ── Right toolbar tools ────────────────────────────────────────────────
+        def tool_btn(icon_name: str, tip: str, click_signal) -> QPushButton:
+            b = QPushButton()
+            b.setFixedSize(28, 28)
+            b.setCursor(Qt.PointingHandCursor)
+            b.setToolTip(tip)
+            pix = load_svg_pixmap(icon_name, 17)
+            b.setIcon(pix)
+            b.setIconSize(pix.size())
+            b.setStyleSheet(
+                "QPushButton{background: transparent; border: none; border-radius: 6px;}"
+                "QPushButton:hover{background-color: #EEDBBA;}"
+            )
+            b.clicked.connect(click_signal)
+            return b
+
+        self.btn_search   = tool_btn("search_magnifier.svg", "Search in document", self.searchClicked)
+        self.btn_book     = tool_btn("book_view.svg", "Toggle book view", self.bookClicked)
+        self.btn_bookmark = tool_btn("bookmark_ribbon.svg", "Add bookmark", self.bookmarkClicked)
+
+        lay.addWidget(self.btn_search)
+        lay.addWidget(self.btn_book)
+        lay.addWidget(self.btn_bookmark)
 
         self.btn_prev.clicked.connect(self.prevRequested)
         self.btn_next.clicked.connect(self.nextRequested)
@@ -103,7 +158,6 @@ class PDFToolbar(QWidget):
     def _on_page_entered(self):
         try:
             page = int(self.page_input.text())
-            # parent PDFViewer handles the jump
             viewer = self.parent()
             if viewer and hasattr(viewer, "go_to_page"):
                 viewer.go_to_page(page - 1)
@@ -111,51 +165,54 @@ class PDFToolbar(QWidget):
             pass
 
 
-# ── Page widget with selection ─────────────────────────────────────────────────
-
-class PDFPageWidget(QLabel):
+class PDFPageWidget(QWidget):
     """
-    Displays a single rendered PDF page (QPixmap).
-    Supports mouse-driven text selection with GemmaNotepad1 highlight overlay.
-    Emits textSelected(text, page_num) on mouse release.
+    Renders PDF page with rounded corners, drop shadow, and selection overlays.
     """
 
     textSelected = Signal(str, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        self.setStyleSheet("background:#FFF8EC;")
         self.setCursor(Qt.IBeamCursor)
+        self.setAttribute(Qt.WA_Hover, True)
 
-        self._page_num   : int             = 0
-        self._zoom       : float           = 1.25
-        self._blocks     : list[dict]      = []   # [{text, rect}]
-        self._sel_start  : QPoint | None   = None
-        self._sel_rect   : QRect | None    = None
-        self._sel_text   : str             = ""
-        self._pixmap_orig: QPixmap | None  = None
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(18)
+        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(0, 0, 0, 45))
+        self.setGraphicsEffect(shadow)
 
-    # ── Public ─────────────────────────────────────────────────────────────────
+        self._page_num: int = 0
+        self._zoom: float = 1.0
+        self._blocks: list[dict] = []
+        self._sel_start: QPoint | None = None
+        self._sel_rect: QRect | None = None
+        self._sel_text: str = ""
+        self._highlight_rects: list[QRect] = []
+        self._pixmap: QPixmap | None = None
 
     def set_page(self, pixmap: QPixmap, blocks: list[dict],
                  page_num: int, zoom: float):
-        self._pixmap_orig = pixmap
-        self._blocks      = blocks
-        self._page_num    = page_num
-        self._zoom        = zoom
-        self._sel_rect    = None
-        self._sel_text    = ""
-        self.setPixmap(pixmap)
-        self.resize(pixmap.size())
+        self._pixmap = pixmap
+        self._blocks = blocks
+        self._page_num = page_num
+        self._zoom = zoom
+        self._sel_rect = None
+        self._sel_text = ""
+        self.setFixedSize(pixmap.size())
+        self.update()
 
-    # ── Mouse events ───────────────────────────────────────────────────────────
+    def set_highlight_rects(self, rects: list[QRect]):
+        self._highlight_rects = rects
+        self.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self._sel_start = event.pos()
             self._sel_rect  = None
             self._sel_text  = ""
+            self._highlight_rects = []
             self.update()
 
     def mouseMoveEvent(self, event):
@@ -175,26 +232,38 @@ class PDFPageWidget(QLabel):
             self.update()
         self._sel_start = None
 
-    # ── Paint selection overlay ────────────────────────────────────────────────
-
     def paintEvent(self, event):
-        super().paintEvent(event)
-        if self._sel_rect and not self._sel_rect.isEmpty():
-            p = QPainter(self)
-            p.setRenderHint(QPainter.Antialiasing)
-            p.fillRect(self._sel_rect, QColor(240, 201, 76, 80))
-            p.setPen(QPen(QColor(212, 160, 23, 180), 1))
-            p.drawRect(self._sel_rect)
-            p.end()
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
 
-    # ── Text extraction ────────────────────────────────────────────────────────
+        # Clip to rounded rectangle
+        clip_path = QPainterPath()
+        clip_path.addRoundedRect(QRectF(self.rect()), 10, 10)
+        p.setClipPath(clip_path)
+
+        if self._pixmap and not self._pixmap.isNull():
+            p.drawPixmap(self.rect(), self._pixmap)
+
+        # Draw persistent highlighted rects (warm yellow)
+        for hr in self._highlight_rects:
+            hpath = QPainterPath()
+            hpath.addRoundedRect(QRectF(hr), 3, 3)
+            p.fillPath(hpath, QColor(251, 214, 101, 190))
+
+        # Draw active selection rect
+        if self._sel_rect and not self._sel_rect.isEmpty():
+            hpath = QPainterPath()
+            hpath.addRoundedRect(QRectF(self._sel_rect), 3, 3)
+            p.fillPath(hpath, QColor(251, 214, 101, 150))
+            p.setPen(QPen(QColor(212, 160, 23, 180), 1))
+            p.drawPath(hpath)
+
+        p.end()
 
     def _extract_selected_text(self) -> str:
-        """Find all text blocks whose fitz.Rect overlaps the selection rect."""
         if not self._sel_rect or not self._blocks:
             return ""
-
-        # Convert widget rect → PDF coordinates
         z = self._zoom
         sel_x0 = self._sel_rect.left()   / z
         sel_y0 = self._sel_rect.top()    / z
@@ -209,73 +278,64 @@ class PDFPageWidget(QLabel):
         return " ".join(texts)
 
 
-# ── Main PDF viewer ────────────────────────────────────────────────────────────
-
 class PDFViewer(QWidget):
-    textSelected = Signal(str, int)   # (text, page_number 1-based)
+    textSelected = Signal(str, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("workspacePanel")
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(
-            "QWidget#workspacePanel{background:#FFF8EC;border-radius:16px;}"
+            "QWidget#workspacePanel{"
+            "background-color: #FAF0DA;"
+            "border-radius: 18px;"
+            "}"
         )
 
-        self._doc         : fitz.Document | None = None
-        self._current_page: int   = 0   # 0-based internally
-        self._total_pages : int   = 0
-        self._zoom        : float = 1.25
-        self._doc_name    : str   = ""
+        self._doc: fitz.Document | None = None
+        self._current_page: int = 0
+        self._total_pages: int = 0
+        self._zoom: float = 1.0
+        self._doc_name: str = ""
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(18, 16, 18, 8)
-        root.setSpacing(4)
+        root.setContentsMargins(4, 4, 4, 8)
+        root.setSpacing(2)
 
         self.toolbar = PDFToolbar(self)
         root.addWidget(self.toolbar)
 
-        div = QFrame()
-        div.setFrameShape(QFrame.HLine)
-        div.setFixedHeight(1)
-        div.setStyleSheet("background:#EDD89A;")
-        root.addWidget(div)
-
         self.scroll = QScrollArea()
-        self.scroll.setWidgetResizable(False)
+        self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QFrame.NoFrame)
         self.scroll.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.scroll.setStyleSheet(
-            "QScrollArea{background:#F7E7B5;border:none;"
-            "border-bottom-left-radius:16px;border-bottom-right-radius:16px;}"
-            "QScrollArea > QWidget{background:#F7E7B5;}"
+            "QScrollArea{background: transparent; border: none;}"
+            "QScrollArea > QWidget{background: transparent;}"
         )
+
+        # Container widget inside scroll area to center and pad the page sheet
+        self._container = QWidget()
+        self._container.setStyleSheet("background: transparent;")
+        c_lay = QVBoxLayout(self._container)
+        c_lay.setContentsMargins(16, 8, 16, 16)
+        c_lay.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
 
         self.page_widget = PDFPageWidget()
         self.page_widget.textSelected.connect(
             lambda t, p: self.textSelected.emit(t, p + 1)
         )
-        # Enable mouse tracking so mouseMoveEvent fires without button held
         self.page_widget.setMouseTracking(True)
-        self.scroll.setMouseTracking(True)
-        self.scroll.viewport().setMouseTracking(True)
-        self.scroll.setWidget(self.page_widget)
+        c_lay.addWidget(self.page_widget, 0, Qt.AlignHCenter)
+
+        self.scroll.setWidget(self._container)
         root.addWidget(self.scroll, 1)
 
         self.toolbar.prevRequested.connect(self._prev)
         self.toolbar.nextRequested.connect(self._next)
         self.toolbar.zoomChanged.connect(self._on_zoom)
 
-        # Show placeholder until a PDF is loaded
-        self.page_widget.setText(
-            "Open a PDF to start reading.\n\nUse the Upload button in the sidebar."
-        )
-        self.page_widget.setAlignment(Qt.AlignCenter)
-        self.toolbar.update_display(0, 0)
-
-    # ── Public API ─────────────────────────────────────────────────────────────
-
-    def load_pdf(self, path: str, doc_name: str = ""):
-        """Open a PDF file and render the first page."""
+    def load_pdf(self, path: str, doc_name: str = "", highlight_text: str | None = None):
         try:
             if self._doc:
                 self._doc.close()
@@ -283,12 +343,7 @@ class PDFViewer(QWidget):
             self._total_pages  = self._doc.page_count
             self._current_page = 0
             self._doc_name     = doc_name or path.split("/")[-1].split("\\")[-1]
-            # Reset page widget style (remove placeholder text style)
-            self.page_widget.setStyleSheet("background:#FFF8EC;")
-            self.page_widget.setText("")
-            self._render()
-        except ValueError as e:
-            QMessageBox.warning(self, "PDF too long", str(e))
+            self._render(highlight_text)
         except Exception as e:
             QMessageBox.critical(self, "Error opening PDF", str(e))
 
@@ -307,16 +362,38 @@ class PDFViewer(QWidget):
             self._doc, self._current_page, selected_text
         )
 
-    # ── Internal ───────────────────────────────────────────────────────────────
+    def highlight_phrase(self, phrase: str) -> QRect | None:
+        if not self._doc:
+            return None
+        page = self._doc[self._current_page]
+        rects = page.search_for(phrase)
+        if not rects:
+            return None
 
-    def _render(self):
+        qrects = []
+        for r in rects:
+            qr = QRect(
+                int(r.x0 * self._zoom),
+                int(r.y0 * self._zoom),
+                int((r.x1 - r.x0) * self._zoom),
+                int((r.y1 - r.y0) * self._zoom)
+            )
+            qrects.append(qr)
+
+        self.page_widget.set_highlight_rects(qrects)
+        return qrects[0] if qrects else None
+
+    def _render(self, highlight_text: str | None = None):
         if self._doc is None:
             return
         pixmap = pdf_service.render_page(self._doc, self._current_page, self._zoom)
         blocks = pdf_service.get_text_blocks(self._doc, self._current_page)
         self.page_widget.set_page(pixmap, blocks, self._current_page, self._zoom)
         self.toolbar.update_display(self._current_page + 1, self._total_pages)
-        # Scroll back to top on page change
+
+        if highlight_text:
+            self.highlight_phrase(highlight_text)
+
         self.scroll.verticalScrollBar().setValue(0)
 
     def _prev(self):
@@ -332,14 +409,6 @@ class PDFViewer(QWidget):
     def _on_zoom(self, level_pct: int):
         self._zoom = level_pct / 100.0
         self._render()
-
-    def _show_placeholder(self):
-        self.page_widget.setText(
-            "Open a PDF to start reading.\n\nUse the Upload button in the sidebar."
-        )
-        self.page_widget.setAlignment(Qt.AlignCenter)
-        self.page_widget.setStyleSheet("background:#FFF8EC; color:#8A9A8A; font-size:14px;")
-        self.toolbar.update_display(0, 0)
 
     def closeEvent(self, event):
         if self._doc:

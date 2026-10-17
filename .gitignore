@@ -31,3 +31,18 @@ desktop.ini
 
 # PyInstaller
 *.spec
+
+# Local reference documents
+/assets/GemmaNotepad1.png
+/assets/Java Programming - Comprehensive Guide.pdf
+/assets/data base models.png
+/design-preview.png
+
+# Temporary scratch and render artifacts
+scratch_*
+render_*
+current_render.png
+window_ref.png
+test.pdf
+
+
