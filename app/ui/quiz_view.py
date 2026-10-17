@@ -146,8 +146,9 @@ class QuizLoadingScreen(QWidget):
             "color:#D4A017;font-size:40px;background:transparent;"
         )
 
-        self._msg = _label("Generating quiz…", "#4A4E4A", 14)
+        self._msg = _label("Generating quiz… this may take 1–3 minutes.", "#4A4E4A", 14)
         self._msg.setAlignment(Qt.AlignCenter)
+        self._msg.setWordWrap(True)
 
         lay.addWidget(self._spinner)
         lay.addWidget(self._msg)
@@ -487,6 +488,19 @@ class QuizView(QWidget):
             QMessageBox.warning(self, "No document",
                 "Please open a PDF document before generating a quiz.")
             return
+
+        # Warn about generation time on slow models
+        from PySide6.QtWidgets import QMessageBox
+        n = config["num_questions"]
+        if n > 3:
+            ret = QMessageBox.question(
+                self, "Generation time",
+                f"Generating {n} questions may take 1–3 minutes on a local model.\n"
+                "Continue?",
+                QMessageBox.Yes | QMessageBox.No
+            )
+            if ret != QMessageBox.Yes:
+                return
 
         self._stack.setCurrentIndex(1)
         self.loading_screen.start()
