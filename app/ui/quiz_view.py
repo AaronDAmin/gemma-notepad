@@ -1,5 +1,6 @@
 """Quiz interface — config → generation → questions → results."""
 from __future__ import annotations
+import pymupdf as fitz
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
     QComboBox, QSpinBox, QButtonGroup, QProgressBar, QScrollArea,
@@ -7,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal
 from app.workers.quiz_worker import QuizWorker
+from app.services.pdf_service import pdf_service
 
 
 # ── Shared styles ──────────────────────────────────────────────────────────────
@@ -35,7 +37,7 @@ _BTN_SECONDARY = (
 _CHOICE_SS = (
     "QPushButton{background:#F7E7B5;border-radius:10px;color:#1A1C1A;"
     "font-size:13px;font-weight:500;padding:12px 16px;text-align:left;"
-    "border:2px solid transparent;border:none;}"
+    "border:2px solid transparent;}"
     "QPushButton:hover{background:#EDD89A;}"
     "QPushButton:checked{background:#FBF0CC;"
     "border:2px solid #F0C94C;font-weight:600;}"
@@ -69,6 +71,9 @@ class QuizConfigForm(QWidget):
         super().__init__(parent)
         self.setStyleSheet("QWidget{background:#FFF8EC;border-radius:16px;}")
 
+        self._total_pages  = 0
+        self._current_page = 1
+
         root = QVBoxLayout(self)
         root.setContentsMargins(32, 28, 32, 28)
         root.setSpacing(14)
@@ -91,9 +96,52 @@ class QuizConfigForm(QWidget):
             row.addWidget(widget, 1)
             lay.addLayout(row)
 
+        # ── Scope selector ─────────────────────────────────────────────────────
+        self.scope_combo = QComboBox()
+        self.scope_combo.addItem("Current page only", "current")
+        self.scope_combo.addItem("Page range", "range")
+        self.scope_combo.setStyleSheet(_COMBO_SS)
+        self.scope_combo.currentIndexChanged.connect(self._on_scope_changed)
+        field("Source", self.scope_combo)
+
+        # ── Page range row (hidden by default) ────────────────────────────────
+        self._range_row = QWidget()
+        self._range_row.setStyleSheet("background:transparent;")
+        range_lay = QHBoxLayout(self._range_row)
+        range_lay.setContentsMargins(0, 0, 0, 0)
+        range_lay.setSpacing(8)
+
+        range_lbl = QLabel("Pages")
+        range_lbl.setFixedWidth(160)
+        range_lbl.setStyleSheet("color:#4A4E4A;font-size:13px;background:transparent;")
+
+        self.page_from = QSpinBox()
+        self.page_from.setRange(1, 20)
+        self.page_from.setValue(1)
+        self.page_from.setStyleSheet(_SPIN_SS)
+        self.page_from.setFixedWidth(70)
+
+        sep_lbl = QLabel("to")
+        sep_lbl.setStyleSheet("color:#4A4E4A;font-size:13px;background:transparent;")
+
+        self.page_to = QSpinBox()
+        self.page_to.setRange(1, 20)
+        self.page_to.setValue(1)
+        self.page_to.setStyleSheet(_SPIN_SS)
+        self.page_to.setFixedWidth(70)
+
+        range_lay.addWidget(range_lbl)
+        range_lay.addWidget(self.page_from)
+        range_lay.addWidget(sep_lbl)
+        range_lay.addWidget(self.page_to)
+        range_lay.addStretch()
+        self._range_row.hide()
+        lay.addWidget(self._range_row)
+
+        # ── Other fields ───────────────────────────────────────────────────────
         self.num_spin = QSpinBox()
-        self.num_spin.setRange(1, 20)
-        self.num_spin.setValue(5)
+        self.num_spin.setRange(1, 10)
+        self.num_spin.setValue(3)
         self.num_spin.setStyleSheet(_SPIN_SS)
 
         self.diff_combo = QComboBox()
@@ -122,11 +170,33 @@ class QuizConfigForm(QWidget):
         root.addLayout(btn_row)
         root.addStretch()
 
+    def update_page_info(self, current_page: int, total_pages: int):
+        """Called by QuizView when context changes."""
+        self._current_page = current_page
+        self._total_pages  = total_pages
+        max_p = max(total_pages, 1)
+        self.page_from.setRange(1, max_p)
+        self.page_to.setRange(1, max_p)
+        self.page_from.setValue(current_page)
+        self.page_to.setValue(current_page)
+
+    def _on_scope_changed(self, idx: int):
+        self._range_row.setVisible(self.scope_combo.currentData() == "range")
+
     def _emit(self):
+        scope = self.scope_combo.currentData()
+        if scope == "current":
+            page_range = (self._current_page, self._current_page)
+        else:
+            p_from = self.page_from.value()
+            p_to   = max(self.page_to.value(), p_from)
+            page_range = (p_from, p_to)
+
         self.generateRequested.emit({
             "num_questions": self.num_spin.value(),
             "difficulty":    self.diff_combo.currentText().lower(),
             "focus":         self.focus_combo.currentText().lower(),
+            "page_range":    page_range,
         })
 
 
@@ -173,7 +243,7 @@ class QuizLoadingScreen(QWidget):
 # ── 2. Question view ───────────────────────────────────────────────────────────
 
 class QuizQuestionView(QWidget):
-    submitRequested = Signal(dict)   # {q_index: chosen_option}
+    submitRequested = Signal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -181,13 +251,12 @@ class QuizQuestionView(QWidget):
 
         self._questions : list[dict] = []
         self._current   : int        = 0
-        self._answers   : dict       = {}   # {index: "A"|"B"|"C"|"D"}
+        self._answers   : dict       = {}
 
         root = QVBoxLayout(self)
         root.setContentsMargins(32, 24, 32, 24)
         root.setSpacing(12)
 
-        # Header
         hdr = QHBoxLayout()
         self.progress_lbl = _label("Question 1 of 5", "#4A4E4A", 13, bold=True)
         hdr.addStretch()
@@ -203,7 +272,6 @@ class QuizQuestionView(QWidget):
         )
         root.addWidget(self.progress_bar)
 
-        # Question text
         self.q_label = QLabel()
         self.q_label.setWordWrap(True)
         self.q_label.setStyleSheet(
@@ -212,7 +280,6 @@ class QuizQuestionView(QWidget):
         root.addWidget(self.q_label)
         root.addSpacing(4)
 
-        # Answer buttons
         self._btn_group = QButtonGroup(self)
         self._btn_group.setExclusive(True)
         self._choice_btns: list[QPushButton] = []
@@ -229,7 +296,6 @@ class QuizQuestionView(QWidget):
 
         root.addStretch()
 
-        # Navigation
         nav = QHBoxLayout()
         self.prev_btn = QPushButton("‹  Previous")
         self.prev_btn.setCursor(Qt.PointingHandCursor)
@@ -253,16 +319,12 @@ class QuizQuestionView(QWidget):
         nav.addWidget(self.submit_btn)
         root.addLayout(nav)
 
-    # ── Public ────────────────────────────────────────────────────────────────
-
     def load_questions(self, questions: list[dict]):
         self._questions = questions
         self._current   = 0
         self._answers   = {}
         self.progress_bar.setRange(0, len(questions))
         self._render()
-
-    # ── Internal ──────────────────────────────────────────────────────────────
 
     def _render(self):
         n   = len(self._questions)
@@ -273,12 +335,6 @@ class QuizQuestionView(QWidget):
         self.progress_bar.setValue(idx + 1)
         self.q_label.setText(q["question"])
 
-        # Save current answer before switching buttons
-        for btn in self._choice_btns:
-            if btn.isChecked():
-                self._answers[idx] = btn.property("option_key")
-
-        # Block signals while updating
         self._btn_group.blockSignals(True)
         for btn in self._choice_btns:
             key  = btn.property("option_key")
@@ -334,10 +390,8 @@ class QuizResultsView(QWidget):
         self.subtitle_lbl = _label("", "#4A4E4A", 14)
         self.subtitle_lbl.setAlignment(Qt.AlignCenter)
         root.addWidget(self.subtitle_lbl)
-
         root.addSpacing(8)
 
-        # Scrollable detail area
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
@@ -362,7 +416,6 @@ class QuizResultsView(QWidget):
         root.addLayout(retry_row)
 
     def show_results(self, questions: list[dict], answers: dict):
-        # Clear previous
         while self._detail_layout.count():
             item = self._detail_layout.takeAt(0)
             if item.widget():
@@ -382,9 +435,9 @@ class QuizResultsView(QWidget):
         )
 
         for i, q in enumerate(questions):
-            chosen  = answers.get(i, "—")
+            chosen      = answers.get(i, "—")
             correct_opt = q["correct"]
-            is_ok   = chosen == correct_opt
+            is_ok       = chosen == correct_opt
 
             card = _card_widget()
             card.setStyleSheet(
@@ -395,10 +448,8 @@ class QuizResultsView(QWidget):
             lay.setContentsMargins(14, 10, 14, 10)
             lay.setSpacing(4)
 
-            # Question
             lay.addWidget(_label(f"Q{i+1}. {q['question']}", "#1A1C1A", 13, bold=True, wrap=True))
 
-            # Chosen answer
             chosen_text = q["options"].get(chosen, "No answer")
             status = "✓" if is_ok else "✗"
             color  = "#2E7D32" if is_ok else "#C62828"
@@ -407,7 +458,6 @@ class QuizResultsView(QWidget):
                 color, 13, wrap=True
             ))
 
-            # Correct answer (if wrong)
             if not is_ok:
                 correct_text = q["options"].get(correct_opt, "")
                 lay.addWidget(_label(
@@ -415,7 +465,6 @@ class QuizResultsView(QWidget):
                     "#2E7D32", 13, wrap=True
                 ))
 
-            # Explanation
             lay.addWidget(_label(
                 f"💡 {q.get('explanation', '')}",
                 "#4A4E4A", 12, wrap=True
@@ -429,19 +478,18 @@ class QuizResultsView(QWidget):
 # ── Main QuizView container ────────────────────────────────────────────────────
 
 class QuizView(QWidget):
-    """
-    Stacks: 0=config, 1=loading, 2=questions, 3=results
-    Needs set_context(model, text, doc_name) called from MainWindow.
-    """
+    """Stacks: 0=config, 1=loading, 2=questions, 3=results."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self._model    : str       = ""
-        self._doc_text : str       = ""
-        self._doc_name : str       = ""
-        self._questions: list[dict] = []
-        self._worker   : QuizWorker | None = None
+        self._model        : str              = ""
+        self._doc                             = None   # fitz.Document or None
+        self._doc_name     : str              = ""
+        self._total_pages  : int              = 0
+        self._current_page : int              = 1
+        self._questions    : list[dict]       = []
+        self._worker       : QuizWorker | None = None
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
@@ -467,10 +515,14 @@ class QuizView(QWidget):
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
-    def set_context(self, model: str, doc_text: str, doc_name: str = ""):
-        self._model    = model
-        self._doc_text = doc_text
-        self._doc_name = doc_name
+    def set_context(self, model: str, doc=None, doc_name: str = "",
+                    total_pages: int = 0, current_page: int = 1):
+        self._model        = model
+        self._doc          = doc
+        self._doc_name     = doc_name
+        self._total_pages  = total_pages
+        self._current_page = current_page
+        self.config_form.update_page_info(current_page, total_pages)
 
     def reset(self):
         self._stack.setCurrentIndex(0)
@@ -483,20 +535,36 @@ class QuizView(QWidget):
             QMessageBox.warning(self, "No model",
                 "Please select an AI model in Settings first.")
             return
-        if not self._doc_text.strip():
+        if self._doc is None:
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.warning(self, "No document",
                 "Please open a PDF document before generating a quiz.")
             return
 
-        # Warn about generation time on slow models
-        from PySide6.QtWidgets import QMessageBox
+        # Extract text from selected page range (1-based)
+        p_from, p_to = config["page_range"]
+        p_from = max(1, p_from)
+        p_to   = min(p_to, self._doc.page_count)
+
+        page_texts = []
+        for p in range(p_from - 1, p_to):   # 0-based for PyMuPDF
+            blocks = pdf_service.get_text_blocks(self._doc, p)
+            page_texts.append("\n".join(b["text"] for b in blocks))
+        doc_text = "\n\n".join(page_texts).strip()
+
+        if not doc_text:
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "No text",
+                "No text found on the selected pages.\n"
+                "Try a different page range.")
+            return
+
         n = config["num_questions"]
         if n > 3:
+            from PySide6.QtWidgets import QMessageBox
             ret = QMessageBox.question(
                 self, "Generation time",
-                f"Generating {n} questions may take 1–3 minutes on a local model.\n"
-                "Continue?",
+                f"Generating {n} questions may take 1–3 minutes.\nContinue?",
                 QMessageBox.Yes | QMessageBox.No
             )
             if ret != QMessageBox.Yes:
@@ -506,7 +574,7 @@ class QuizView(QWidget):
         self.loading_screen.start()
 
         self._worker = QuizWorker(
-            self._model, self._doc_text,
+            self._model, doc_text,
             config["num_questions"],
             config["difficulty"],
             config["focus"],
