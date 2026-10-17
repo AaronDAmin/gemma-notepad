@@ -1,4 +1,4 @@
-"""Custom document tab bar — mustard yellow strip at the top of the window."""
+"""Custom document tab bar — GemmaNotepad1 yellow strip at the top of the window."""
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QPushButton, QLabel, QFrame, QSizePolicy,
     QScrollArea
@@ -45,7 +45,7 @@ class DocumentTab(QWidget):
     def set_active(self, active: bool):
         self._active = active
         if active:
-            # Active tab: same mustard as background → stands out via weight/text
+            # Active tab: same GemmaNotepad1 as background → stands out via weight/text
             self.setStyleSheet(
                 "QWidget{background:#F0C94C; border-radius:10px;}"
             )
@@ -59,7 +59,7 @@ class DocumentTab(QWidget):
                 "QPushButton:hover{background:rgba(0,0,0,0.12);}"
             )
         else:
-            # Inactive tab: dark charcoal pill on the mustard strip
+            # Inactive tab: dark charcoal pill on the GemmaNotepad1 strip
             self.setStyleSheet(
                 "QWidget{background:#343834; border-radius:10px;}"
                 "QWidget:hover{background:#3D413D;}"
@@ -87,7 +87,7 @@ class DocumentTab(QWidget):
 
 class TabBar(QWidget):
     """
-    Full-width mustard strip.  Active tab blends into the background;
+    Full-width GemmaNotepad1 strip.  Active tab blends into the background;
     inactive tabs are dark charcoal pills.
     """
 
@@ -130,7 +130,7 @@ class TabBar(QWidget):
 
         self._scroll.setWidget(self._tab_container)
 
-        # + button — slightly darker mustard so it reads as a button
+        # + button — slightly darker GemmaNotepad1 so it reads as a button
         self.new_tab_btn = QPushButton("+")
         self.new_tab_btn.setFixedSize(34, 34)
         self.new_tab_btn.setCursor(Qt.PointingHandCursor)
@@ -146,7 +146,7 @@ class TabBar(QWidget):
         outer.addSpacing(8)
         outer.addWidget(self.new_tab_btn, 0, Qt.AlignVCenter)
 
-    # ── Paint the mustard background explicitly ────────────────────────────────
+    # ── Paint the GemmaNotepad1 background explicitly ────────────────────────────────
     def paintEvent(self, event):
         p = QPainter(self)
         p.fillRect(self.rect(), QColor("#F0C94C"))

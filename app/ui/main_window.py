@@ -162,21 +162,22 @@ class MainWindow(QMainWindow):
             self.sidebar.set_active_tool("select")
 
     def _on_quiz_tool(self):
-        # Pass current model and PDF text to the quiz view
-        pdf_text = ""
-        doc_name = ""
-        if self.workspace.pdf_viewer._doc is not None:
-            from app.services.pdf_service import pdf_service
-            doc  = self.workspace.pdf_viewer._doc
-            pages = range(doc.page_count)
-            pdf_text = "\n\n".join(
-                "\n".join(b["text"] for b in pdf_service.get_text_blocks(doc, p))
-                for p in pages
-            )
-            doc_name = self.workspace.pdf_viewer._doc_name
+        pdf_viewer = self.workspace.pdf_viewer
+        doc_name   = ""
+        total_pages = 0
+        current_page = 1   # 1-based
+
+        if pdf_viewer._doc is not None:
+            doc_name     = pdf_viewer._doc_name
+            total_pages  = pdf_viewer._total_pages
+            current_page = pdf_viewer._current_page + 1  # convert 0-based → 1-based
 
         self.workspace.quiz_view.set_context(
-            self._active_model, pdf_text, doc_name
+            model        = self._active_model,
+            doc          = pdf_viewer._doc,       # pass fitz.Document directly
+            doc_name     = doc_name,
+            total_pages  = total_pages,
+            current_page = current_page,
         )
         self.workspace.show_quiz()
 
@@ -347,8 +348,12 @@ class MainWindow(QMainWindow):
             self._active_model = model
             settings_repo.set("active_model", model)
             self.ai_popup.set_model(model)
-            self.workspace.quiz_view.set_context(
-                model,
-                self.workspace.quiz_view._doc_text,
-                self.workspace.quiz_view._doc_name
+            # Update quiz view model without changing doc context
+            qv = self.workspace.quiz_view
+            qv.set_context(
+                model=model,
+                doc=qv._doc,
+                doc_name=qv._doc_name,
+                total_pages=qv._total_pages,
+                current_page=qv._current_page,
             )

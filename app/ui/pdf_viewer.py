@@ -115,7 +115,7 @@ class PDFToolbar(QWidget):
 class PDFPageWidget(QLabel):
     """
     Displays a single rendered PDF page (QPixmap).
-    Supports mouse-driven text selection with mustard highlight overlay.
+    Supports mouse-driven text selection with GemmaNotepad1 highlight overlay.
     Emits textSelected(text, page_num) on mouse release.
     """
 

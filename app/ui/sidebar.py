@@ -10,7 +10,7 @@ from PySide6.QtGui import QPainter, QColor, QPainterPath
 class SidebarButton(QWidget):
     """
     Icon + label button that paints itself directly.
-    Active → mustard #F0C94C rounded card.
+    Active → GemmaNotepad1 #F0C94C rounded card.
     Inactive → transparent, greyed icons, hover darkens.
     """
 
