@@ -110,12 +110,6 @@ cd <repository-directory>
 python -m venv .venv
 ```
 
-Activate it on Windows:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
 ### 3. Install Dependencies
 
 ```bash
