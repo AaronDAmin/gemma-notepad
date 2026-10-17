@@ -1,5 +1,5 @@
 """
-GemmaNotepad1 Study Notepad — entry point.
+GemmaNotepad 1 Study Notepad — entry point.
 
 Usage:
     python main.py
