@@ -66,9 +66,10 @@ class MainWindow(QMainWindow):
         body_lay.addWidget(self.workspace, 1)
         root.addWidget(body, 1)
 
-        # Re-parent the AI popup to MainWindow so it can float over everything
-        self.workspace.ai_popup.setParent(self)
-        self.workspace.ai_popup.hide()
+        # AI popup lives on MainWindow so it floats over everything
+        from app.ui.ai_popup import AIContextPopup
+        self.ai_popup = AIContextPopup(self)
+        self.ai_popup.hide()
 
     def _wire_signals(self):
         self.tab_bar.tabSelected.connect(self._on_tab_selected)
@@ -100,7 +101,7 @@ class MainWindow(QMainWindow):
 
     def _load_settings(self):
         self._active_model = settings_repo.get("active_model", "")
-        self.workspace.ai_popup.set_model(self._active_model)
+        self.ai_popup.set_model(self._active_model)
 
     def _refresh_recent(self):
         recent = doc_repo.get_recent(limit=8)
@@ -257,7 +258,7 @@ class MainWindow(QMainWindow):
         from PySide6.QtGui import QCursor
         cursor_pos = QCursor.pos()
 
-        popup = self.workspace.ai_popup
+        popup = self.ai_popup
         popup.set_model(self._active_model)
         popup.show_near(cursor_pos, text, context, doc_name)
 
@@ -327,4 +328,4 @@ class MainWindow(QMainWindow):
             model = combo.currentText()
             self._active_model = model
             settings_repo.set("active_model", model)
-            self.workspace.ai_popup.set_model(model)
+            self.ai_popup.set_model(model)

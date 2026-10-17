@@ -251,8 +251,12 @@ class PDFViewer(QWidget):
 
         self.page_widget = PDFPageWidget()
         self.page_widget.textSelected.connect(
-            lambda t, p: self.textSelected.emit(t, p + 1)   # expose 1-based
+            lambda t, p: self.textSelected.emit(t, p + 1)
         )
+        # Enable mouse tracking so mouseMoveEvent fires without button held
+        self.page_widget.setMouseTracking(True)
+        self.scroll.setMouseTracking(True)
+        self.scroll.viewport().setMouseTracking(True)
         self.scroll.setWidget(self.page_widget)
         root.addWidget(self.scroll, 1)
 
