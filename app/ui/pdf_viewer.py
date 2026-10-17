@@ -260,8 +260,12 @@ class PDFViewer(QWidget):
         self.toolbar.nextRequested.connect(self._next)
         self.toolbar.zoomChanged.connect(self._on_zoom)
 
-        # Show placeholder text until a PDF is loaded
-        self._show_placeholder()
+        # Show placeholder until a PDF is loaded
+        self.page_widget.setText(
+            "Open a PDF to start reading.\n\nUse the Upload button in the sidebar."
+        )
+        self.page_widget.setAlignment(Qt.AlignCenter)
+        self.toolbar.update_display(0, 0)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -273,7 +277,10 @@ class PDFViewer(QWidget):
             self._doc          = pdf_service.open(path)
             self._total_pages  = self._doc.page_count
             self._current_page = 0
-            self._doc_name     = doc_name or path.split("\\")[-1]
+            self._doc_name     = doc_name or path.split("/")[-1].split("\\")[-1]
+            # Reset page widget style (remove placeholder text style)
+            self.page_widget.setStyleSheet("background:#FFF8EC;")
+            self.page_widget.setText("")
             self._render()
         except ValueError as e:
             QMessageBox.warning(self, "PDF too long", str(e))
@@ -322,15 +329,11 @@ class PDFViewer(QWidget):
         self._render()
 
     def _show_placeholder(self):
-        """Show a welcoming empty state before any PDF is loaded."""
-        placeholder = QLabel(
+        self.page_widget.setText(
             "Open a PDF to start reading.\n\nUse the Upload button in the sidebar."
         )
-        placeholder.setAlignment(Qt.AlignCenter)
-        placeholder.setStyleSheet(
-            "color:#8A9A8A;font-size:14px;background:#FFF8EC;"
-        )
-        self.scroll.setWidget(placeholder)
+        self.page_widget.setAlignment(Qt.AlignCenter)
+        self.page_widget.setStyleSheet("background:#FFF8EC; color:#8A9A8A; font-size:14px;")
         self.toolbar.update_display(0, 0)
 
     def closeEvent(self, event):
