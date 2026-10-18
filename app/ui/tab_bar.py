@@ -1,8 +1,7 @@
 """Custom document tab bar and unified title bar."""
 from __future__ import annotations
 from PySide6.QtWidgets import (
-    QWidget, QHBoxLayout, QPushButton, QLabel, QFrame, QSizePolicy,
-    QScrollArea
+    QWidget, QHBoxLayout, QPushButton, QLabel, QFrame, QSizePolicy
 )
 from PySide6.QtCore import Qt, Signal, QPoint
 from PySide6.QtGui import QPainter, QColor
@@ -17,13 +16,13 @@ class TrafficLights(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(68, 28)
+        self.setFixedSize(72, 28)
         self.setAttribute(Qt.WA_Hover, True)
         self.setCursor(Qt.ArrowCursor)
 
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(4, 0, 4, 0)
-        lay.setSpacing(8)
+        lay.setContentsMargins(6, 0, 4, 0)
+        lay.setSpacing(9)
         lay.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
         def make_dot(color: str, hover_color: str, click_signal):
@@ -31,8 +30,8 @@ class TrafficLights(QWidget):
             btn.setFixedSize(12, 12)
             btn.setCursor(Qt.PointingHandCursor)
             btn.setStyleSheet(
-                f"QPushButton{{background-color:{color};border-radius:6px;border:none;}}"
-                f"QPushButton:hover{{background-color:{hover_color};}}"
+                f"QPushButton{{background-color: {color}; border-radius: 6px; border: none;}}"
+                f"QPushButton:hover{{background-color: {hover_color};}}"
             )
             btn.clicked.connect(click_signal)
             return btn
@@ -58,7 +57,7 @@ class WindowControls(QWidget):
         self.setFixedHeight(32)
 
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(0, 0, 4, 0)
+        lay.setContentsMargins(0, 0, 8, 0)
         lay.setSpacing(2)
         lay.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
@@ -69,9 +68,9 @@ class WindowControls(QWidget):
             hover_bg = "#E05555" if is_close else "rgba(255, 255, 255, 0.08)"
             hover_color = "#FFFFFF" if is_close else "#F0EDE8"
             b.setStyleSheet(
-                f"QPushButton{{background:transparent;color:#A0ACA0;font-size:13px;"
-                f"border:none;border-radius:6px;font-family:'Segoe UI',sans-serif;}}"
-                f"QPushButton:hover{{background:{hover_bg};color:{hover_color};}}"
+                f"QPushButton{{background: transparent; color: #A0ACA0; font-size: 13px;"
+                f"border: none; border-radius: 6px; font-family: 'Segoe UI', sans-serif;}}"
+                f"QPushButton:hover{{background: {hover_bg}; color: {hover_color};}}"
             )
             return b
 
@@ -101,8 +100,8 @@ class DocumentTab(QWidget):
         self._active = False
 
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedHeight(44)
-        self.setMinimumWidth(115)
+        self.setFixedHeight(48)
+        self.setMinimumWidth(130)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
 
         lay = QHBoxLayout(self)
@@ -126,7 +125,8 @@ class DocumentTab(QWidget):
     def set_active(self, active: bool):
         self._active = active
         if active:
-            # Active tab: warm yellow, rounded top, joins workspace
+            # Active tab: warm yellow, rounded top, joins workspace flush at bottom
+            self.setFixedHeight(48)
             self.setStyleSheet(
                 "QWidget{"
                 "background-color: #FFD04D;"
@@ -145,10 +145,12 @@ class DocumentTab(QWidget):
             )
         else:
             # Inactive tab: dark charcoal pill
+            self.setFixedHeight(40)
             self.setStyleSheet(
                 "QWidget{"
                 "background-color: #363C38;"
                 "border-radius: 10px;"
+                "margin-top: 4px;"
                 "}"
                 "QWidget:hover{background-color: #3F4742;}"
             )
@@ -188,7 +190,7 @@ class TabBar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(56)
+        self.setFixedHeight(68)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet("QWidget{background-color: #202A27;}")
 
@@ -197,8 +199,8 @@ class TabBar(QWidget):
         self._drag_pos: QPoint | None = None
 
         outer = QHBoxLayout(self)
-        outer.setContentsMargins(14, 8, 12, 0)
-        outer.setSpacing(12)
+        outer.setContentsMargins(18, 12, 14, 0)
+        outer.setSpacing(10)
         outer.setAlignment(Qt.AlignBottom)
 
         # ── Traffic lights on far left ─────────────────────────────────────────
@@ -207,9 +209,9 @@ class TabBar(QWidget):
         self.traffic_lights.minimizeClicked.connect(self.minimizeRequested)
         self.traffic_lights.maximizeClicked.connect(self.maximizeRequested)
         outer.addWidget(self.traffic_lights, 0, Qt.AlignVCenter)
-        outer.addSpacing(16)
+        outer.addSpacing(18)
 
-        # ── Tabs scroll area ───────────────────────────────────────────────────
+        # ── Tabs container ─────────────────────────────────────────────────────
         self._tab_container = QWidget()
         self._tab_container.setStyleSheet("background: transparent;")
         self._tab_layout = QHBoxLayout(self._tab_container)
@@ -221,22 +223,23 @@ class TabBar(QWidget):
 
         # ── '+' New tab button ─────────────────────────────────────────────────
         self.new_tab_btn = QPushButton("+")
-        self.new_tab_btn.setFixedSize(36, 36)
+        self.new_tab_btn.setFixedSize(38, 38)
         self.new_tab_btn.setCursor(Qt.PointingHandCursor)
         self.new_tab_btn.setStyleSheet(
             "QPushButton{"
             "background-color: #FFD04D;"
             "border-radius: 10px;"
             "color: #1A1C1A;"
-            "font-size: 20px;"
-            "font-weight: 400;"
+            "font-size: 22px;"
+            "font-weight: 300;"
             "border: none;"
+            "margin-bottom: 2px;"
             "}"
             "QPushButton:hover{background-color: #E8B93A;}"
             "QPushButton:pressed{background-color: #D4A017;}"
         )
         self.new_tab_btn.clicked.connect(self.newTabRequested)
-        outer.addWidget(self.new_tab_btn, 0, Qt.AlignVCenter)
+        outer.addWidget(self.new_tab_btn, 0, Qt.AlignBottom)
 
         outer.addStretch(1)
 
@@ -247,7 +250,6 @@ class TabBar(QWidget):
         self.win_controls.closeClicked.connect(self.closeRequested)
         outer.addWidget(self.win_controls, 0, Qt.AlignVCenter)
 
-    # ── Window Dragging ────────────────────────────────────────────────────────
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             win = self.window()
@@ -271,7 +273,6 @@ class TabBar(QWidget):
             self.maximizeRequested.emit()
         super().mouseDoubleClickEvent(event)
 
-    # ── Tab Management ─────────────────────────────────────────────────────────
     def add_tab(self, tab_id: int, title: str, activate: bool = True):
         tab = DocumentTab(tab_id, title)
         tab.closeRequested.connect(self._on_close)

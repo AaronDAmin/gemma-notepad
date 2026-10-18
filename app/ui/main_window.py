@@ -138,7 +138,9 @@ class MainWindow(QMainWindow):
         self.sidebar.selectClicked.connect(self._on_select_tool)
         self.sidebar.uploadClicked.connect(self._on_upload_tool)
         self.sidebar.quizClicked.connect(self._on_quiz_tool)
-        self.sidebar.settingsClicked.connect(self._on_settings)
+        self.sidebar.recentClicked.connect(self._on_recent_tool)
+        self.sidebar.libraryClicked.connect(self._on_library_tool)
+        self.sidebar.settingsClicked.connect(self._on_settings_tool)
         self.sidebar.themeClicked.connect(self._on_theme_toggle)
 
         # Workspace & Upload
@@ -148,6 +150,21 @@ class MainWindow(QMainWindow):
         self.workspace.upload_panel.documentRequested.connect(self._open_recent)
         self.workspace.text_editor.btn_save.clicked.connect(self._save_note)
         self.workspace.text_editor.editor.textChanged.connect(self._remember_note)
+
+        # Central Views
+        self.workspace.home_view.openPdfRequested.connect(self._import_pdf)
+        self.workspace.home_view.importImageRequested.connect(self._import_image)
+        self.workspace.home_view.newNoteRequested.connect(self._new_text_note)
+        self.workspace.home_view.generateQuizRequested.connect(self._on_quiz_tool)
+        self.workspace.home_view.documentOpened.connect(self._open_document)
+        self.workspace.home_view.viewAllRecentRequested.connect(self._on_recent_tool)
+
+        self.workspace.recent_view.documentOpened.connect(self._open_document)
+        self.workspace.library_view.documentOpened.connect(self._open_document)
+        self.workspace.library_view.uploadRequested.connect(self._on_upload_tool)
+        self.workspace.search_view.openDocumentAtPage.connect(self._open_document_at_page)
+        self.workspace.pdf_viewer.toolbar.searchClicked.connect(self._on_search_tool)
+        self.workspace.settings_view.modelChanged.connect(self._on_model_changed)
 
         # Text selection → AI popup
         self.workspace.pdf_viewer.textSelected.connect(self._on_text_selected)
@@ -213,6 +230,9 @@ class MainWindow(QMainWindow):
             else:
                 items.append(("TEXT", d.name, "Text  •  2 days ago", d.id))
         self.workspace.upload_panel.refresh_recent(items)
+        self.workspace.home_view.refresh_recent()
+        self.workspace.recent_view.refresh()
+        self.workspace.library_view.refresh()
 
     def _toggle_maximize(self):
         if self.isMaximized():
@@ -234,6 +254,7 @@ class MainWindow(QMainWindow):
         self._create_tab(f"Cours {count:02d}", activate=True)
 
     def _on_tab_selected(self, tab_id: int):
+        self.sidebar.set_active_tool("select")
         ws   = self._workspaces.get(tab_id, {})
         mode = ws.get("mode", "empty")
         if mode == "pdf":
@@ -241,14 +262,17 @@ class MainWindow(QMainWindow):
                 self.workspace.pdf_viewer.load_pdf(ws["path"], doc_name=ws["name"])
             self.workspace.show_pdf()
         elif mode == "image":
+            self.ai_popup.hide()
             if ws.get("path"):
                 self.workspace.image_viewer.load_image(ws["path"])
             self.workspace.show_image()
         elif mode == "text":
+            self.ai_popup.hide()
             self.workspace.text_editor.set_content(ws.get("content", ""))
             self.workspace.show_text()
         else:
-            self.workspace.show_empty()
+            self.ai_popup.hide()
+            self.workspace.show_home()
 
     def _on_tab_closed(self, tab_id: int):
         self._workspaces.pop(tab_id, None)
@@ -294,9 +318,12 @@ class MainWindow(QMainWindow):
             self._refresh_recent()
 
     def _on_select_tool(self):
-        if self.workspace.current_mode() == 4:
-            self.workspace.return_from_quiz()
-            self.sidebar.set_active_tool("select")
+        active_id = self.tab_bar.active_tab_id()
+        if active_id and active_id in self._workspaces:
+            self._on_tab_selected(active_id)
+        else:
+            self.workspace.show_home()
+        self.sidebar.set_active_tool("select")
 
     def _on_upload_tool(self):
         self.workspace.toggle_upload_panel()
@@ -304,6 +331,7 @@ class MainWindow(QMainWindow):
             self.sidebar.set_active_tool("select")
 
     def _on_quiz_tool(self):
+        self.ai_popup.hide()
         pdf_viewer = self.workspace.pdf_viewer
         doc_name   = ""
         total_pages = 0
@@ -322,12 +350,72 @@ class MainWindow(QMainWindow):
             current_page = current_page,
         )
         self.workspace.show_quiz()
+        self.sidebar.set_active_tool("quiz")
+
+    def _on_recent_tool(self):
+        self.ai_popup.hide()
+        self.workspace.show_recent()
+        self.sidebar.set_active_tool("recent")
+
+    def _on_library_tool(self):
+        self.ai_popup.hide()
+        self.workspace.show_library()
+        self.sidebar.set_active_tool("library")
+
+    def _on_search_tool(self):
+        self.ai_popup.hide()
+        self.workspace.show_search()
+        self.sidebar.set_active_tool("")
+
+    def _on_settings_tool(self):
+        self.ai_popup.hide()
+        self.workspace.show_settings()
+        self.sidebar.set_active_tool("")
 
     def _on_settings(self):
-        self._open_settings_dialog()
+        self.ai_popup.hide()
+        self.workspace.show_settings()
+        self.sidebar.set_active_tool("")
+
+    def _on_model_changed(self, model: str):
+        self._active_model = model
+        self.ai_popup.set_model(model)
+        qv = self.workspace.quiz_view
+        qv.set_context(
+            model        = model,
+            doc          = qv._doc,
+            doc_name     = qv._doc_name,
+            total_pages  = qv._total_pages,
+            current_page = qv._current_page,
+        )
+
+    def _open_document(self, doc: Document):
+        if doc is None:
+            return
+        if doc.doc_type != DocumentType.TEXT and not (doc.file_path and os.path.isfile(doc.file_path)):
+            QMessageBox.warning(self, "Document unavailable", "This file has been moved or deleted.")
+            return
+
+        for tab_id, state in self._workspaces.items():
+            if state.get("document_id") == doc.id or (doc.file_path and state.get("path") == doc.file_path):
+                self.tab_bar.set_active_tab(tab_id)
+                self.sidebar.set_active_tool("select")
+                return
+
+        tab_id = self._create_tab(doc.name, activate=False)
+        self._workspaces[tab_id].update(
+            mode=doc.doc_type.value, path=doc.file_path,
+            content=doc.content or "", document_id=doc.id, document=doc,
+        )
+        self.tab_bar.set_active_tab(tab_id)
+        self.sidebar.set_active_tool("select")
+
+    def _open_document_at_page(self, doc: Document, page: int):
+        self._open_document(doc)
+        if doc.doc_type == DocumentType.PDF:
+            self.workspace.pdf_viewer.go_to_page(page - 1)
 
     def _on_theme_toggle(self):
-        # Visual feedback for night mode toggle
         pass
 
     # ── Document import ────────────────────────────────────────────────────────

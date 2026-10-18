@@ -44,5 +44,12 @@ render_*
 current_render.png
 window_ref.png
 test.pdf
+phase1_*.png
+compare_*.png
+ref_*.png
+test_*.png
+crop_*.png
+cur_window_*.png
+generate_dbms_pdf.py
 
 

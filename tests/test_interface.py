@@ -92,9 +92,43 @@ def test_sidebar_tool_switching(qapp):
     assert sidebar.btn_quiz._active is True
     assert sidebar.btn_select._active is False
 
+    sidebar.btn_recent.clicked.emit()
+    assert sidebar._active_tool == "recent"
+    assert sidebar.btn_recent._active is True
+    assert sidebar.btn_quiz._active is False
+
+    sidebar.btn_library.clicked.emit()
+    assert sidebar._active_tool == "library"
+    assert sidebar.btn_library._active is True
+    assert sidebar.btn_recent._active is False
+
     sidebar.btn_select.clicked.emit()
     assert sidebar._active_tool == "select"
     assert sidebar.btn_select._active is True
+
+
+def test_workspace_navigation(qapp):
+    """Test switching between views in the workspace stack."""
+    window = MainWindow()
+    window.show()
+    qapp.processEvents()
+
+    # Recent view
+    window.sidebar.btn_recent.clicked.emit()
+    assert window.workspace.current_mode() == 5
+    assert window.sidebar._active_tool == "recent"
+
+    # Library view
+    window.sidebar.btn_library.clicked.emit()
+    assert window.workspace.current_mode() == 6
+    assert window.sidebar._active_tool == "library"
+
+    # Select returns to document
+    window.sidebar.btn_select.clicked.emit()
+    assert window.workspace.current_mode() == 1  # PDF
+    assert window.sidebar._active_tool == "select"
+
+    window.close()
 
 
 def test_upload_panel_toggle(qapp):

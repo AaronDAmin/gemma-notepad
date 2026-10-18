@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPainter, QColor, QPainterPath, QPixmap
+from PySide6.QtGui import QPainter, QColor, QPainterPath
 
 from app.ui.icons import load_svg_pixmap
 
@@ -28,12 +28,12 @@ class SidebarButton(QWidget):
         self._label_text         = label
 
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedSize(76, 76)
+        self.setFixedSize(80, 74)
         self.setAttribute(Qt.WA_Hover, True)
 
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(0, 10, 0, 10)
-        lay.setSpacing(6)
+        lay.setContentsMargins(0, 8, 0, 8)
+        lay.setSpacing(4)
         lay.setAlignment(Qt.AlignCenter)
 
         self._icon_lbl = QLabel()
@@ -81,7 +81,14 @@ class SidebarButton(QWidget):
 
     def _refresh(self):
         icon_name = self._icon_active_name if self._active else self._icon_inactive_name
-        pix = load_svg_pixmap(icon_name, 26)
+        if self._active:
+            color = "#1A1C1A"
+        elif self._hovered:
+            color = "#FFFFFF"
+        else:
+            color = "#FFF1CC"
+
+        pix = load_svg_pixmap(icon_name, 24, color=color)
         self._icon_lbl.setPixmap(pix)
 
         if self._active:
@@ -97,26 +104,28 @@ class SidebarButton(QWidget):
 
 class Sidebar(QWidget):
     """
-    Vertical sidebar (~88 px wide):
-      Top    — Select / Upload / Quiz
+    Vertical sidebar (104 px wide):
+      Top    — Select / Upload / Quiz / Recent / Library
       Bottom — Settings / Night Mode
     """
 
     selectClicked   = Signal()
     uploadClicked   = Signal()
     quizClicked     = Signal()
+    recentClicked   = Signal()
+    libraryClicked  = Signal()
     settingsClicked = Signal()
     themeClicked    = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(88)
+        self.setFixedWidth(104)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet("QWidget{background-color: #202A27;}")
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(6, 12, 6, 18)
-        root.setSpacing(10)
+        root.setContentsMargins(12, 10, 12, 16)
+        root.setSpacing(6)
         root.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
         # ── Tool buttons ───────────────────────────────────────────────────────
@@ -129,10 +138,18 @@ class Sidebar(QWidget):
         self.btn_quiz = SidebarButton(
             "quiz_badge.svg", "quiz_badge.svg", "Quiz"
         )
+        self.btn_recent = SidebarButton(
+            "recent_clock.svg", "recent_clock.svg", "Recent"
+        )
+        self.btn_library = SidebarButton(
+            "library_books.svg", "library_books.svg", "Library"
+        )
 
-        root.addWidget(self.btn_select, 0, Qt.AlignHCenter)
-        root.addWidget(self.btn_upload, 0, Qt.AlignHCenter)
-        root.addWidget(self.btn_quiz,   0, Qt.AlignHCenter)
+        root.addWidget(self.btn_select,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_upload,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_quiz,    0, Qt.AlignHCenter)
+        root.addWidget(self.btn_recent,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_library, 0, Qt.AlignHCenter)
 
         root.addStretch(1)
 
@@ -148,6 +165,8 @@ class Sidebar(QWidget):
         self.btn_select.clicked.connect(self._on_select)
         self.btn_upload.clicked.connect(self._on_upload)
         self.btn_quiz.clicked.connect(self._on_quiz)
+        self.btn_recent.clicked.connect(self._on_recent)
+        self.btn_library.clicked.connect(self._on_library)
         self.btn_settings.clicked.connect(self.settingsClicked)
         self.btn_theme.clicked.connect(self.themeClicked)
 
@@ -156,10 +175,10 @@ class Sidebar(QWidget):
 
     def _bottom_btn(self, icon_name: str, tip: str) -> QPushButton:
         b = QPushButton()
-        b.setFixedSize(38, 38)
+        b.setFixedSize(36, 36)
         b.setCursor(Qt.PointingHandCursor)
         b.setToolTip(tip)
-        pix = load_svg_pixmap(icon_name, 22)
+        pix = load_svg_pixmap(icon_name, 20, color="#FFF1CC")
         b.setIcon(pix)
         b.setIconSize(pix.size())
         b.setStyleSheet(
@@ -177,6 +196,8 @@ class Sidebar(QWidget):
         self.btn_select.set_active(name == "select")
         self.btn_upload.set_active(name == "upload")
         self.btn_quiz.set_active(name == "quiz")
+        self.btn_recent.set_active(name == "recent")
+        self.btn_library.set_active(name == "library")
 
     def _on_select(self):
         self._set_active("select")
@@ -188,6 +209,14 @@ class Sidebar(QWidget):
     def _on_quiz(self):
         self._set_active("quiz")
         self.quizClicked.emit()
+
+    def _on_recent(self):
+        self._set_active("recent")
+        self.recentClicked.emit()
+
+    def _on_library(self):
+        self._set_active("library")
+        self.libraryClicked.emit()
 
     def set_active_tool(self, name: str):
         self._set_active(name)
