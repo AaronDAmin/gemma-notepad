@@ -44,7 +44,7 @@ render_*
 current_render.png
 window_ref.png
 test.pdf
-phase1_*.png
+phase*.png
 compare_*.png
 ref_*.png
 test_*.png

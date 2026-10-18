@@ -9,6 +9,8 @@ from app.ui.tab_bar import TabBar, DocumentTab
 from app.ui.sidebar import Sidebar
 from app.ui.upload_dialog import UploadPanel
 from app.ui.pdf_viewer import PDFViewer
+from app.ui.image_viewer import ImageViewer
+from app.ui.text_editor import TextEditor
 from app.ui.ai_popup import AIContextPopup
 
 
@@ -172,3 +174,42 @@ def test_ai_popup_anchor(qapp):
     popup.hide()
     assert popup.isVisible() is False
     window.close()
+
+
+def test_image_viewer_functionality(qapp):
+    """Test image loading, rotation, and zooming."""
+    viewer = ImageViewer()
+    import os
+    from app.core.config import ASSETS_DIR
+    er_path = str(ASSETS_DIR / "ER_Diagram.jpg")
+    if os.path.exists(er_path):
+        viewer.load_image(er_path)
+        assert viewer._pixmap is not None
+        assert viewer.filename_lbl.text() == "ER_Diagram.jpg"
+
+        # Rotation
+        viewer.rotate_right()
+        assert viewer._rotation == 90
+        viewer.rotate_left()
+        assert viewer._rotation == 0
+
+        # Zoom
+        initial_zoom = viewer._zoom
+        viewer._zoom_in()
+        assert viewer._zoom > initial_zoom
+        viewer._zoom_out()
+
+
+def test_text_editor_functionality(qapp):
+    """Test rich study note editor actions."""
+    editor = TextEditor()
+    editor.set_title("Test Note")
+    assert editor.get_title() == "Test Note"
+
+    editor.set_content("Database Normalization Concepts")
+    assert "Normalization" in editor.get_content()
+
+    editor._toggle_bold()
+    editor._insert_bullet_list()
+    editor._insert_code()
+    assert editor.editor.toPlainText() is not None
