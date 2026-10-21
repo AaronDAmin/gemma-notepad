@@ -1,65 +1,64 @@
 """Left vertical sidebar with tool buttons."""
+from __future__ import annotations
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QPushButton, QFrame, QLabel,
-    QSizePolicy, QGraphicsDropShadowEffect
+    QWidget, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPainter, QColor, QPainterPath
 
+from app.ui.icons import load_svg_pixmap
+
 
 class SidebarButton(QWidget):
     """
-    Icon + label button that paints itself directly.
-    Active → GemmaNotepad1 #F0C94C rounded card.
-    Inactive → transparent, greyed icons, hover darkens.
+    Vertical tool button (Icon + Text label).
+    Active   → Warm yellow (#FFD04D) rounded card, dark icon & text.
+    Inactive → Transparent, cream icon & text, hover darkens.
     """
 
     clicked = Signal()
 
-    def __init__(self, icon_text: str, label: str, parent=None):
+    def __init__(self, icon_active_name: str, icon_inactive_name: str, label: str, parent=None):
         super().__init__(parent)
-        self._active  = False
+        self._active = False
         self._hovered = False
 
+        self._icon_active_name   = icon_active_name
+        self._icon_inactive_name = icon_inactive_name
+        self._label_text         = label
+
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedSize(62, 64)
+        self.setFixedSize(80, 74)
         self.setAttribute(Qt.WA_Hover, True)
 
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 8, 0, 8)
-        lay.setSpacing(2)
+        lay.setSpacing(4)
         lay.setAlignment(Qt.AlignCenter)
 
-        self._icon = QLabel(icon_text)
-        self._icon.setAlignment(Qt.AlignCenter)
-        self._icon.setFixedHeight(26)
-        self._icon.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self._icon_lbl = QLabel()
+        self._icon_lbl.setAlignment(Qt.AlignCenter)
+        self._icon_lbl.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
-        self._text = QLabel(label)
-        self._text.setAlignment(Qt.AlignCenter)
-        self._text.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        self._text_lbl = QLabel(label)
+        self._text_lbl.setAlignment(Qt.AlignCenter)
+        self._text_lbl.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
-        lay.addWidget(self._icon)
-        lay.addWidget(self._text)
+        lay.addWidget(self._icon_lbl)
+        lay.addWidget(self._text_lbl)
 
         self._refresh()
-
-    # ── Paint background ───────────────────────────────────────────────────────
 
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
+        path = QPainterPath()
+        path.addRoundedRect(self.rect(), 14, 14)
         if self._active:
-            path = QPainterPath()
-            path.addRoundedRect(self.rect(), 12, 12)
-            p.fillPath(path, QColor("#F0C94C"))
+            p.fillPath(path, QColor("#FFD04D"))
         elif self._hovered:
-            path = QPainterPath()
-            path.addRoundedRect(self.rect(), 12, 12)
             p.fillPath(path, QColor("#343834"))
         p.end()
-
-    # ── Events ────────────────────────────────────────────────────────────────
 
     def enterEvent(self, event):
         self._hovered = True
@@ -75,114 +74,130 @@ class SidebarButton(QWidget):
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
 
-    # ── State ─────────────────────────────────────────────────────────────────
-
     def set_active(self, active: bool):
         self._active = active
         self._refresh()
         self.update()
 
     def _refresh(self):
-        """Update child label styles based on current state."""
+        icon_name = self._icon_active_name if self._active else self._icon_inactive_name
         if self._active:
-            self._icon.setStyleSheet(
-                "background:transparent;font-size:22px;color:#1A1C1A;"
-            )
-            self._text.setStyleSheet(
-                "background:transparent;font-size:11px;"
-                "font-weight:700;color:#1A1C1A;"
+            color = "#1A1C1A"
+        elif self._hovered:
+            color = "#FFFFFF"
+        else:
+            color = "#FFF1CC"
+
+        pix = load_svg_pixmap(icon_name, 24, color=color)
+        self._icon_lbl.setPixmap(pix)
+
+        if self._active:
+            self._text_lbl.setStyleSheet(
+                "color: #1A1C1A; font-size: 12.5px; font-weight: 700; background: transparent;"
             )
         else:
-            text_col = "#C0C8C0" if self._hovered else "#6A7A6A"
-            self._icon.setStyleSheet(
-                f"background:transparent;font-size:22px;color:{text_col};"
-            )
-            self._text.setStyleSheet(
-                f"background:transparent;font-size:11px;"
-                f"font-weight:500;color:{text_col};"
+            col = "#FFFFFF" if self._hovered else "#FFF1CC"
+            self._text_lbl.setStyleSheet(
+                f"color: {col}; font-size: 12px; font-weight: 500; background: transparent;"
             )
 
 
 class Sidebar(QWidget):
     """
-    Vertical sidebar (78 px wide):
-      Top    — Select / Upload / Quiz
-      Bottom — Settings / Theme
+    Vertical sidebar (104 px wide):
+      Top    — Select / Upload / Quiz / Recent / Library
+      Bottom — Settings / Night Mode
     """
 
     selectClicked   = Signal()
     uploadClicked   = Signal()
     quizClicked     = Signal()
+    recentClicked   = Signal()
+    libraryClicked  = Signal()
     settingsClicked = Signal()
+    themeClicked    = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(78)
-        # Paint background explicitly so it isn't transparent
+        self.setFixedWidth(104)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setStyleSheet("QWidget{background:#282B28;}")
+        self.setStyleSheet("QWidget{background-color: #202A27;}")
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(8, 16, 8, 16)
-        root.setSpacing(4)
-        root.setAlignment(Qt.AlignTop)
+        root.setContentsMargins(12, 10, 12, 16)
+        root.setSpacing(6)
+        root.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
-        # Tool buttons — use a cursor icon from unicode for Select
-        self.btn_select = SidebarButton("↖", "Select")
-        self.btn_upload = SidebarButton("↑", "Upload")
-        self.btn_quiz   = SidebarButton("?", "Quiz")
+        # ── Tool buttons ───────────────────────────────────────────────────────
+        self.btn_select = SidebarButton(
+            "select_arrow_dark.svg", "select_arrow_light.svg", "Select"
+        )
+        self.btn_upload = SidebarButton(
+            "upload_tray.svg", "upload_tray.svg", "Upload"
+        )
+        self.btn_quiz = SidebarButton(
+            "quiz_badge.svg", "quiz_badge.svg", "Quiz"
+        )
+        self.btn_recent = SidebarButton(
+            "recent_clock.svg", "recent_clock.svg", "Recent"
+        )
+        self.btn_library = SidebarButton(
+            "library_books.svg", "library_books.svg", "Library"
+        )
 
-        root.addWidget(self.btn_select, 0, Qt.AlignHCenter)
-        root.addSpacing(4)
-        root.addWidget(self.btn_upload, 0, Qt.AlignHCenter)
-        root.addSpacing(4)
-        root.addWidget(self.btn_quiz,   0, Qt.AlignHCenter)
+        root.addWidget(self.btn_select,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_upload,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_quiz,    0, Qt.AlignHCenter)
+        root.addWidget(self.btn_recent,  0, Qt.AlignHCenter)
+        root.addWidget(self.btn_library, 0, Qt.AlignHCenter)
 
-        root.addStretch()
+        root.addStretch(1)
 
-        # Separator
-        sep = QFrame()
-        sep.setFrameShape(QFrame.HLine)
-        sep.setFixedHeight(1)
-        sep.setStyleSheet("background:#3D413D;")
-        root.addWidget(sep)
-        root.addSpacing(10)
-
-        # Bottom buttons
-        self.btn_settings = self._bottom_btn("⚙", "Settings")
+        # ── Bottom buttons (Settings & Theme) ──────────────────────────────────
+        self.btn_settings = self._bottom_btn("settings_gear.svg", "Settings")
+        self.btn_theme    = self._bottom_btn("moon_crescent.svg", "Toggle Night Mode")
 
         root.addWidget(self.btn_settings, 0, Qt.AlignHCenter)
+        root.addSpacing(6)
+        root.addWidget(self.btn_theme,    0, Qt.AlignHCenter)
 
-        # Wire
+        # ── Signal wiring ──────────────────────────────────────────────────────
         self.btn_select.clicked.connect(self._on_select)
         self.btn_upload.clicked.connect(self._on_upload)
         self.btn_quiz.clicked.connect(self._on_quiz)
+        self.btn_recent.clicked.connect(self._on_recent)
+        self.btn_library.clicked.connect(self._on_library)
         self.btn_settings.clicked.connect(self.settingsClicked)
+        self.btn_theme.clicked.connect(self.themeClicked)
 
         self._active_tool = "select"
         self.btn_select.set_active(True)
 
-    # ── Helpers ────────────────────────────────────────────────────────────────
-
-    def _bottom_btn(self, icon: str, tip: str) -> QPushButton:
-        b = QPushButton(icon)
-        b.setFixedSize(38, 38)
+    def _bottom_btn(self, icon_name: str, tip: str) -> QPushButton:
+        b = QPushButton()
+        b.setFixedSize(36, 36)
         b.setCursor(Qt.PointingHandCursor)
         b.setToolTip(tip)
+        pix = load_svg_pixmap(icon_name, 20, color="#FFF1CC")
+        b.setIcon(pix)
+        b.setIconSize(pix.size())
         b.setStyleSheet(
-            "QPushButton{background:transparent;border-radius:10px;"
-            "color:#4A5A4A;font-size:18px;border:none;}"
-            "QPushButton:hover{background:#343834;color:#B0B8B0;}"
+            "QPushButton{"
+            "background: transparent;"
+            "border-radius: 10px;"
+            "border: none;"
+            "}"
+            "QPushButton:hover{background-color: #343834;}"
         )
         return b
-
-    # ── Internal ───────────────────────────────────────────────────────────────
 
     def _set_active(self, name: str):
         self._active_tool = name
         self.btn_select.set_active(name == "select")
         self.btn_upload.set_active(name == "upload")
         self.btn_quiz.set_active(name == "quiz")
+        self.btn_recent.set_active(name == "recent")
+        self.btn_library.set_active(name == "library")
 
     def _on_select(self):
         self._set_active("select")
@@ -195,7 +210,13 @@ class Sidebar(QWidget):
         self._set_active("quiz")
         self.quizClicked.emit()
 
-    # ── Public API ─────────────────────────────────────────────────────────────
+    def _on_recent(self):
+        self._set_active("recent")
+        self.recentClicked.emit()
+
+    def _on_library(self):
+        self._set_active("library")
+        self.libraryClicked.emit()
 
     def set_active_tool(self, name: str):
         self._set_active(name)

@@ -1,6 +1,8 @@
-"""Central workspace — QStackedWidget that hosts PDF / Image / Text / Quiz views.
-Also owns the Upload panel overlay.
+"""Central workspace — QStackedWidget hosting all primary study views.
+Hosts PDF, Image, Text Notes, Quiz, Home, Library, Recent, Search, and Settings.
+Owns the Upload panel on the right.
 """
+from __future__ import annotations
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget, QLabel,
     QPushButton, QSizePolicy, QFrame, QGraphicsDropShadowEffect
@@ -8,80 +10,37 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 
+from app.ui.home_view     import HomeView
 from app.ui.pdf_viewer    import PDFViewer
 from app.ui.image_viewer  import ImageViewer
 from app.ui.text_editor   import TextEditor
 from app.ui.quiz_view     import QuizView
+from app.ui.recent_view   import RecentDocumentsView
+from app.ui.library_view  import LibraryView
+from app.ui.search_view   import SearchView
+from app.ui.settings_view import SettingsView
 from app.ui.upload_dialog import UploadPanel
 from app.ui.ai_popup      import AIContextPopup
 
 
-# Content mode indices inside the stacked widget
-MODE_EMPTY = 0
-MODE_PDF   = 1
-MODE_IMAGE = 2
-MODE_TEXT  = 3
-MODE_QUIZ  = 4
-
-
-class EmptyState(QWidget):
-    """Shown when no document is open in the current workspace."""
-
-    uploadRequested = Signal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setObjectName("workspacePanel")
-
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignCenter)
-        layout.setSpacing(12)
-
-        icon = QLabel("📚")
-        icon.setAlignment(Qt.AlignCenter)
-        icon.setStyleSheet("font-size:52px; background:transparent;")
-
-        title = QLabel("No document open")
-        title.setObjectName("emptyStateTitle")
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet(
-            "color:#D4A017; font-size:22px; font-weight:700; background:transparent;"
-        )
-
-        subtitle = QLabel(
-            "Upload a PDF, image, or start a new text note\nto begin studying."
-        )
-        subtitle.setObjectName("emptyStateSubtitle")
-        subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setWordWrap(True)
-        subtitle.setStyleSheet(
-            "color:#8A9A8A; font-size:14px; background:transparent;"
-        )
-
-        btn = QPushButton("⬆  Upload Content")
-        btn.setObjectName("emptyStateBtn")
-        btn.setCursor(Qt.PointingHandCursor)
-        btn.setStyleSheet(
-            "QPushButton{background:#F0C94C;border-radius:10px;color:#1A1C1A;"
-            "font-size:14px;font-weight:600;padding:12px 28px;}"
-            "QPushButton:hover{background:#E8B93A;}"
-        )
-        btn.clicked.connect(self.uploadRequested)
-
-        layout.addWidget(icon)
-        layout.addWidget(title)
-        layout.addWidget(subtitle)
-        layout.addSpacing(8)
-        layout.addWidget(btn, 0, Qt.AlignHCenter)
+MODE_HOME     = 0
+MODE_EMPTY    = 0  # alias for backwards compatibility
+MODE_PDF      = 1
+MODE_IMAGE    = 2
+MODE_TEXT     = 3
+MODE_QUIZ     = 4
+MODE_RECENT   = 5
+MODE_LIBRARY  = 6
+MODE_SEARCH   = 7
+MODE_SETTINGS = 8
 
 
 class Workspace(QWidget):
     """
     Outer workspace container.
-    Hosts the content stack on the left and the upload panel (toggleable) on the right.
+    Hosts central content stack on the left and upload panel on the right.
     """
 
-    # Forwarded signals
     pdfUploadRequested   = Signal()
     imageUploadRequested = Signal()
     textUploadRequested  = Signal()
@@ -89,63 +48,65 @@ class Workspace(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("workspaceContainer")
-        self.setStyleSheet("#workspaceContainer{background:#282B28; padding:12px 12px 12px 8px;}")
+        self.setStyleSheet("#workspaceContainer{background-color: #202A27;}")
 
-        self._upload_visible = False
-        self._prev_mode = MODE_EMPTY
+        self._upload_visible = True
+        self._prev_mode = MODE_PDF
 
         outer = QHBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setContentsMargins(0, 0, 12, 12)
         outer.setSpacing(12)
 
         # ── Content stack ──────────────────────────────────────────────────────
         self._stack = QStackedWidget()
-        self._stack.setStyleSheet("border-radius:16px;")
+        self._stack.setStyleSheet("border-radius: 18px;")
 
-        self._empty_state  = EmptyState()
+        self.home_view     = HomeView()
         self.pdf_viewer    = PDFViewer()
         self.image_viewer  = ImageViewer()
         self.text_editor   = TextEditor()
         self.quiz_view     = QuizView()
+        self.recent_view   = RecentDocumentsView()
+        self.library_view  = LibraryView()
+        self.search_view   = SearchView()
+        self.settings_view = SettingsView()
 
-        self._stack.addWidget(self._empty_state)   # 0
-        self._stack.addWidget(self.pdf_viewer)     # 1
-        self._stack.addWidget(self.image_viewer)   # 2
-        self._stack.addWidget(self.text_editor)    # 3
-        self._stack.addWidget(self.quiz_view)      # 4
+        self._stack.addWidget(self.home_view)      # 0: home
+        self._stack.addWidget(self.pdf_viewer)     # 1: pdf
+        self._stack.addWidget(self.image_viewer)   # 2: image
+        self._stack.addWidget(self.text_editor)    # 3: text
+        self._stack.addWidget(self.quiz_view)      # 4: quiz
+        self._stack.addWidget(self.recent_view)    # 5: recent
+        self._stack.addWidget(self.library_view)   # 6: library
+        self._stack.addWidget(self.search_view)    # 7: search
+        self._stack.addWidget(self.settings_view)  # 8: settings
 
         outer.addWidget(self._stack, 1)
 
-        # Drop shadow on the content panel
+        # Drop shadow on content stack
         shadow = QGraphicsDropShadowEffect(self._stack)
-        shadow.setBlurRadius(32)
-        shadow.setOffset(0, 6)
-        shadow.setColor(QColor(0, 0, 0, 90))
+        shadow.setBlurRadius(24)
+        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(0, 0, 0, 50))
         self._stack.setGraphicsEffect(shadow)
 
-        # ── Upload panel (hidden by default) ───────────────────────────────────
+        # ── Upload panel (visible by default) ──────────────────────────────────
         self.upload_panel = UploadPanel()
-        self.upload_panel.setVisible(False)
-        outer.addWidget(self.upload_panel, 0, Qt.AlignTop)
+        self.upload_panel.setVisible(True)
+        outer.addWidget(self.upload_panel)
 
-        # ── AI context popup (floats over workspace) ───────────────────────────
-        # NOTE: popup is created here but re-parented to MainWindow in main_window.py
-        self.ai_popup = AIContextPopup(self)
-        self.ai_popup.hide()
-
-        # Wire upload panel signals
+        # Wire upload panel
         self.upload_panel.pdfRequested.connect(self.pdfUploadRequested)
         self.upload_panel.imageRequested.connect(self.imageUploadRequested)
         self.upload_panel.textRequested.connect(self.textUploadRequested)
         self.upload_panel.closeRequested.connect(self.hide_upload_panel)
 
-        # Empty state upload shortcut
-        self._empty_state.uploadRequested.connect(self.toggle_upload_panel)
-
-    # ── Mode switching ─────────────────────────────────────────────────────────
-
     def show_empty(self):
-        self._stack.setCurrentIndex(MODE_EMPTY)
+        self._stack.setCurrentIndex(MODE_HOME)
+
+    def show_home(self):
+        self._stack.setCurrentIndex(MODE_HOME)
+        self.home_view.refresh_recent()
 
     def show_pdf(self):
         self._stack.setCurrentIndex(MODE_PDF)
@@ -158,16 +119,32 @@ class Workspace(QWidget):
 
     def show_quiz(self):
         self._prev_mode = self._stack.currentIndex()
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_QUIZ)
 
+    def show_recent(self):
+        self.hide_upload_panel()
+        self._stack.setCurrentIndex(MODE_RECENT)
+        self.recent_view.refresh()
+
+    def show_library(self):
+        self.hide_upload_panel()
+        self._stack.setCurrentIndex(MODE_LIBRARY)
+        self.library_view.refresh()
+
+    def show_search(self):
+        self.hide_upload_panel()
+        self._stack.setCurrentIndex(MODE_SEARCH)
+
+    def show_settings(self):
+        self.hide_upload_panel()
+        self._stack.setCurrentIndex(MODE_SETTINGS)
+
     def return_from_quiz(self):
-        """Go back to whatever was shown before quiz."""
         self._stack.setCurrentIndex(self._prev_mode)
 
     def current_mode(self) -> int:
         return self._stack.currentIndex()
-
-    # ── Upload panel ───────────────────────────────────────────────────────────
 
     def toggle_upload_panel(self):
         if self._upload_visible:

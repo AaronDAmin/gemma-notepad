@@ -1,4 +1,4 @@
-# Python
+# ── Python & Bytecode ───────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
@@ -9,25 +9,33 @@ dist/
 build/
 *.egg
 
-# Virtual environment
+# ── Testing & Virtual Environments ─────────────────────────────────────────────
+.pytest_cache/
 .venv/
 venv/
 env/
 
-# Database (local user data — not committed)
+# ── Local Database & Runtime State ────────────────────────────────────────────
 data/*.db
 data/*.db-shm
 data/*.db-wal
 
-# IDE
+# ── IDEs & System ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.kiro/
-
-# OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# PyInstaller
+# ── Archived Renders & Scratch Artifacts ──────────────────────────────────────
+archive/
+scratch/
+scratch_*
+render_*
 *.spec
+
+# ── Reference Images & Sample Media ──────────────────────────────────────────
+assets/references/*.png
+assets/data base models.png
+assets/Java Programming - Comprehensive Guide.pdf

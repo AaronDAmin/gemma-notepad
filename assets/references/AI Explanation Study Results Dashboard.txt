@@ -1,0 +1,13 @@
+La page précédente représente le popup AI Explanation de GemmaNotepad1.
+Son objectif est de permettre à l'étudiant de comprendre pourquoi une réponse est correcte ou incorrecte, en utilisant l'IA locale (Ollama) et le contenu du document étudié.
+Comment fonctionne ce popup ?
+1. Question et réponses : il affiche la question du quiz, les quatre propositions, la réponse choisie et la bonne réponse.
+2. Detailed Explanation : l'IA explique le concept en détail, en s'appuyant sur le PDF.
+3. Source Reference : indique le document et la page d'où provient l'information. Le bouton Open Page permet de retrouver le passage.
+4. Key Points : présente les éléments essentiels à mémoriser.
+5. Follow-up Questions : permet de poser d'autres questions pour approfondir la compréhension.
+Exemple
+Si tu réponds incorrectement à une question sur le Storage Manager dans un DBMS, tu peux ouvrir ce popup pour comprendre son rôle et pourquoi les autres réponses ne conviennent pas.
+Un détail important : ce popup ne doit pas être limité aux quiz. Je te recommande de réutiliser le même composant lorsque l'utilisateur sélectionne un passage dans un PDF ou dans ses notes.
+Dans ce cas, il affichera l'explication du texte sélectionné plutôt qu'une correction de quiz.
+Ainsi, tu auras un seul composant IA réutilisable pour deux fonctionnalités : l'explication pendant la lecture et la correction des quiz.

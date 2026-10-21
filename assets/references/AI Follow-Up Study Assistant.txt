@@ -1,0 +1,2 @@
+Cette fenêtre permet à l'étudiant de continuer une conversation avec l'IA locale après avoir demandé une explication ou corrigé une question de quiz.
+Elle propose un espace de discussion, des questions suggérées et des références aux pages du PDF pour approfondir un concept sans perdre le contexte initial.
