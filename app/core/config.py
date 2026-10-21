@@ -26,6 +26,7 @@ PDF_MAX_PAGES = 20
 
 # ── Ollama ─────────────────────────────────────────────────────────────────────
 OLLAMA_TIMEOUT  = 300  # seconds — generous for slow CPU models (gemma3 etc.)
+DEFAULT_MODEL   = "gemma2:2b"
 
 # ── Zoom presets ───────────────────────────────────────────────────────────────
 ZOOM_LEVELS = [50, 75, 100, 125, 150, 175, 200]

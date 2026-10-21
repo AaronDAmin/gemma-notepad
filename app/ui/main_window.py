@@ -165,6 +165,7 @@ class MainWindow(QMainWindow):
         self.workspace.search_view.openDocumentAtPage.connect(self._open_document_at_page)
         self.workspace.pdf_viewer.toolbar.searchClicked.connect(self._on_search_tool)
         self.workspace.settings_view.modelChanged.connect(self._on_model_changed)
+        self.workspace.quiz_view.openPageRequested.connect(self._on_jump_to_pdf_page)
 
         # Text selection → AI popup
         self.workspace.pdf_viewer.textSelected.connect(self._on_text_selected)
@@ -414,6 +415,12 @@ class MainWindow(QMainWindow):
         self._open_document(doc)
         if doc.doc_type == DocumentType.PDF:
             self.workspace.pdf_viewer.go_to_page(page - 1)
+
+    def _on_jump_to_pdf_page(self, doc_name: str, page: int):
+        self.ai_popup.hide()
+        self.workspace.show_pdf()
+        self.sidebar.set_active_tool("select")
+        self.workspace.pdf_viewer.go_to_page(max(0, page - 1))
 
     def _on_theme_toggle(self):
         pass

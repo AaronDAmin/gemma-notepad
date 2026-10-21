@@ -119,20 +119,25 @@ class Workspace(QWidget):
 
     def show_quiz(self):
         self._prev_mode = self._stack.currentIndex()
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_QUIZ)
 
     def show_recent(self):
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_RECENT)
         self.recent_view.refresh()
 
     def show_library(self):
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_LIBRARY)
         self.library_view.refresh()
 
     def show_search(self):
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_SEARCH)
 
     def show_settings(self):
+        self.hide_upload_panel()
         self._stack.setCurrentIndex(MODE_SETTINGS)
 
     def return_from_quiz(self):
