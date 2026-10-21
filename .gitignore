@@ -1,4 +1,4 @@
-# Python
+# ── Python & Bytecode ───────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
@@ -9,47 +9,33 @@ dist/
 build/
 *.egg
 
-# Virtual environment
+# ── Testing & Virtual Environments ─────────────────────────────────────────────
+.pytest_cache/
 .venv/
 venv/
 env/
 
-# Database (local user data — not committed)
+# ── Local Database & Runtime State ────────────────────────────────────────────
 data/*.db
 data/*.db-shm
 data/*.db-wal
 
-# IDE
+# ── IDEs & System ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.kiro/
-
-# OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# PyInstaller
-*.spec
-
-# Local reference documents
-/assets/GemmaNotepad1.png
-/assets/Java Programming - Comprehensive Guide.pdf
-/assets/data base models.png
-/design-preview.png
-
-# Temporary scratch and render artifacts
+# ── Archived Renders & Scratch Artifacts ──────────────────────────────────────
+archive/
+scratch/
 scratch_*
 render_*
-current_render.png
-window_ref.png
-test.pdf
-phase*.png
-compare_*.png
-ref_*.png
-test_*.png
-crop_*.png
-cur_window_*.png
-generate_dbms_pdf.py
+*.spec
 
-
+# ── Reference Images & Sample Media ──────────────────────────────────────────
+assets/references/*.png
+assets/data base models.png
+assets/Java Programming - Comprehensive Guide.pdf
