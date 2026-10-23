@@ -14,7 +14,7 @@
 [![PySide6](https://img.shields.io/badge/PySide6-Qt%206-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-F0C94C?style=for-the-badge&logoColor=black)](https://ollama.com)
 [![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
-[![License](https://img.shields.io/badge/License-MIT-E05555?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPL%20v3-E05555?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
 <br/>
@@ -319,7 +319,15 @@ Please keep contributions consistent with the project's **lightweight, privacy-f
 
 ## 📄 &nbsp; License
 
-This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
+This project is licensed under the **GNU General Public License v3.0** — see the [`LICENSE`](LICENSE) file for details.
+
+**Key Points:**
+- ✅ You can use, modify, and distribute this software freely
+- ✅ You must share any modifications under GPL v3
+- ✅ You must include the original copyright and license notices
+- ❌ You cannot make this software proprietary
+
+Learn more at [gnu.org/licenses/gpl-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ---
 
