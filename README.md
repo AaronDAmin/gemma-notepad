@@ -1,262 +1,338 @@
-# NotepadLLM
+<div align="center">
 
-### Your intelligent workspace for focused learning.
+<br/>
 
-**NotepadLLM** is a modern, lightweight, AI-powered desktop study application built with Python and PySide6. It combines document reading, intelligent explanations, note-taking, and interactive quizzes into a single distraction-free workspace.
+<!-- Logo / Title -->
+<img src="https://readme-typing-svg.demolab.com?font=Segoe+UI&weight=800&size=42&pause=1000&color=F0C94C&center=true&vCenter=true&width=500&lines=NotepadLLM" alt="NotepadLLM" />
 
-Powered by **Ollama and local language models**, NotepadLLM brings AI-assisted learning directly to your computer — without cloud dependencies, API keys, or internet access.
+<h3>✦ &nbsp; Your intelligent workspace for focused learning &nbsp; ✦</h3>
 
-**Read. Understand. Practice. Repeat.**
+<br/>
 
----
+<!-- Badges -->
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![PySide6](https://img.shields.io/badge/PySide6-Qt%206-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
+[![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-F0C94C?style=for-the-badge&logoColor=black)](https://ollama.com)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![License](https://img.shields.io/badge/License-MIT-E05555?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
-## Application Demo
+<br/>
 
-![NotepadLLM Demo](assets/demo/NotepadLLM-demo.gif)
+> **Read. Understand. Practice. Repeat.**
+>
+> NotepadLLM is a modern, AI-powered desktop study application built with Python and PySide6.
+> It combines document reading, intelligent explanations, note-taking, and interactive quizzes
+> into a single distraction-free workspace — powered entirely by **local AI**. No cloud. No API keys. No tracking.
 
-*Explore documents, highlight concepts, get instant AI explanations, and test your knowledge — all within one workspace.*
+<br/>
 
-## Features
-
-### Intelligent Document Workspace
-
-- **Multi-tab interface** — Open and organize multiple study sessions.
-- **PDF Reader** — Read PDFs with page navigation, zoom, and text selection.
-- **Image Support** — Import and view images alongside your study materials.
-- **Text Editor** — Create, edit, and save personal study notes.
-- **Session Persistence** — Resume your documents and reading positions.
-
-### Context-Aware AI Assistant
-
-Select any passage from your study material and let the AI explain it using the surrounding document context.
-
-- Instant explanations through contextual popups.
-- Simplified or detailed explanations.
-- Follow-up questions for deeper understanding.
-- Document-aware responses.
-- Local model selection through Ollama.
-- Private, offline AI processing.
-
-### Smart Quiz Generator
-
-Turn your study materials into interactive multiple-choice quizzes.
-
-- Generate quizzes directly from your documents.
-- Choose specific chapters or pages.
-- Customize difficulty and question count.
-- Practice memorization, comprehension, and application.
-- Receive automatic scoring and answer explanations.
-- Review incorrect answers.
-- Track quiz attempts and learning progress.
-
-### Privacy by Design
-
-Your documents stay on your computer.
-
-NotepadLLM uses locally hosted AI models through Ollama, so document analysis and quiz generation do not require external AI services.
-
-No account. No API key. No cloud processing.
-
-## Preview
-
-### Application Interface
-
-![NotepadLLM Interface](assets/screenshots/main-window.png)
-
-### AI-Powered Explanations
-
-![Contextual AI Assistant](assets/screenshots/ai-assistant.png)
-
-### Interactive Quizzes
-
-![Quiz Interface](assets/screenshots/quiz.png)
+</div>
 
 ---
 
-## Tech Stack
+<div align="center">
 
-| Component | Technology |
-|---|---|
-| Core Language | Python 3.12+ |
-| Desktop Framework | PySide6 / Qt 6 |
-| UI Styling | Qt Style Sheets (QSS) |
-| PDF Processing | PyMuPDF |
-| AI Runtime | Ollama |
-| AI Models | Locally installed Ollama models |
-| Local Database | SQLite |
-| Background Processing | QThread / Qt Workers |
-| Platform | Windows 10 / 11 |
+## 📸 &nbsp; Application Preview
 
-## Installation
+<br/>
+
+<img src="assets/screenshots/preview.png" alt="NotepadLLM Interface" width="90%" style="border-radius: 16px;" />
+
+<sub><sup>✦ &nbsp; Multi-tab PDF reader · AI explanations · Upload panel · Recent documents &nbsp; ✦</sup></sub>
+
+<br/>
+
+</div>
+
+---
+
+## ✨ &nbsp; Features
+
+<br/>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 📄 &nbsp; Intelligent Document Workspace
+
+A clean, focused reading environment for all your study materials.
+
+- **Multi-tab interface** — juggle multiple documents at once
+- **PDF Reader** — page navigation, zoom controls, text selection
+- **Image Viewer** — import diagrams, slides, and visual notes
+- **Text Editor** — write and save personal study notes
+- **Session Persistence** — pick up exactly where you left off
+
+</td>
+<td width="50%" valign="top">
+
+### 🤖 &nbsp; Context-Aware AI Assistant
+
+Select any passage and let the AI explain it using your document's full context.
+
+- Instant explanations through a smart contextual popup
+- Simplified **or** detailed explanations on demand
+- Follow-up questions for deeper understanding
+- Fully document-aware responses
+- Choose your own locally installed model
+- 100% offline — your content never leaves your machine
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🧠 &nbsp; Smart Quiz Generator
+
+Turn your study materials into interactive quizzes in seconds.
+
+- Generate quizzes directly from any document
+- Target specific chapters or page ranges
+- Configure difficulty level and question count
+- Multiple-choice with automatic scoring
+- Detailed answer explanations after each attempt
+- Track your progress over time
+
+</td>
+<td width="50%" valign="top">
+
+### 🔒 &nbsp; Privacy by Design
+
+Your documents stay on your computer. Always.
+
+- **No account required** — open and run immediately
+- **No API keys** — no subscriptions, no costs
+- **No cloud processing** — AI runs entirely on-device via Ollama
+- **No telemetry** — nothing is ever sent anywhere
+- Works fully offline after initial setup
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 &nbsp; Quick Start
 
 ### Prerequisites
 
-Ensure you have the following installed:
+Make sure you have the following installed before running NotepadLLM:
 
-- Python 3.12 or later
-- Ollama
-- At least one Ollama-compatible local language model
+| Requirement | Version | Link |
+|---|---|---|
+| Python | 3.12 or later | [python.org](https://python.org) |
+| Ollama | Latest | [ollama.com](https://ollama.com) |
+| A local LLM | Any Ollama model | `ollama pull gemma2:2b` |
 
-### 1. Clone the Repository
+<br/>
+
+### Installation
+
+**1. Clone the repository**
 
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/AaronDAmin/notepadLLM.git
+cd notepadLLM
 ```
 
-### 2. Create a Virtual Environment
+**2. Create a virtual environment**
 
 ```bash
 python -m venv .venv
+.venv\Scripts\activate      # Windows
+# source .venv/bin/activate # macOS / Linux
 ```
 
-### 3. Install Dependencies
+**3. Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Prepare Ollama
-
-Make sure Ollama is running locally.
+**4. Start Ollama**
 
 ```bash
-ollama list
+ollama serve          # start the local AI server
+ollama list           # verify your installed models
 ```
 
-This command displays your installed models.
+> No model yet? Pull one: `ollama pull gemma2:2b`
 
-If Ollama is not already running, start it using:
-
-```bash
-ollama serve
-```
-
-### 5. Launch NotepadLLM
+**5. Launch NotepadLLM** 🎉
 
 ```bash
 python main.py
 ```
 
-Select your preferred installed AI model in the application's settings and start studying.
+Open **Settings** to select your preferred model, then start studying.
 
-## How It Works
+---
 
-**1. Import your material**
+## 🔄 &nbsp; How It Works
 
-Open a PDF, image, or text document using the Upload tool.
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                                                                      │
+│  1. IMPORT  ──▶  2. READ & SELECT  ──▶  3. AI EXPLAIN  ──▶  4. QUIZ │
+│                                                                      │
+│  Upload PDF,      Highlight any        Get instant        Generate   │
+│  image or text    concept or           contextual AI      and take   │
+│  document         passage              explanation        a quiz     │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+```
 
-**2. Explore and understand**
+**Step 1 — Import** &nbsp; Open a PDF, image, or text file from the Upload panel.
 
-Read your document, highlight an unfamiliar concept, and select **Explain with AI** to receive a contextual explanation.
+**Step 2 — Read & Select** &nbsp; Navigate through your document. Highlight any passage that needs clarification.
 
-**3. Practice what you learned**
+**Step 3 — Explain with AI** &nbsp; Click *Explain with AI* in the popup. The local model reads your selection in context and returns a clear explanation.
 
-Open Quiz mode, select the relevant material, and configure your quiz.
+**Step 4 — Test Yourself** &nbsp; Open Quiz mode, configure your parameters, and answer AI-generated multiple-choice questions.
 
-**4. Review your performance**
+---
 
-Answer questions, receive feedback, and revisit concepts that need improvement.
+## 🏗 &nbsp; Project Architecture
 
-All within the same workspace.
-
-## Project Architecture
-
-```text
-study-notepad/
+```
+notepadLLM/
 │
-├── main.py
+├── main.py                     ← Entry point
 ├── requirements.txt
-├── README.md
 │
 ├── app/
 │   ├── core/
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   └── models.py
+│   │   ├── config.py           ← App constants & paths
+│   │   ├── database.py         ← SQLite setup & migrations
+│   │   └── models.py           ← Data models
 │   │
 │   ├── ui/
-│   │   ├── main_window.py
-│   │   ├── sidebar.py
-│   │   ├── tab_bar.py
-│   │   ├── workspace.py
-│   │   ├── pdf_viewer.py
-│   │   ├── image_viewer.py
-│   │   ├── text_editor.py
-│   │   ├── ai_popup.py
-│   │   └── quiz_view.py
+│   │   ├── main_window.py      ← Root window & layout
+│   │   ├── sidebar.py          ← Left navigation bar
+│   │   ├── tab_bar.py          ← Multi-tab document bar
+│   │   ├── workspace.py        ← Central document area
+│   │   ├── pdf_viewer.py       ← PDF rendering & navigation
+│   │   ├── image_viewer.py     ← Image display
+│   │   ├── text_editor.py      ← Notes editor
+│   │   ├── ai_popup.py         ← AI explanation popup
+│   │   ├── quiz_view.py        ← Quiz configuration & play
+│   │   └── dialogs/            ← Error & upload dialogs
 │   │
 │   ├── services/
-│   │   ├── document_service.py
-│   │   ├── context_service.py
-│   │   ├── ollama_service.py
-│   │   └── quiz_service.py
+│   │   ├── context_service.py  ← Document context extraction
+│   │   ├── ollama_service.py   ← Ollama API client
+│   │   ├── pdf_service.py      ← PDF parsing (PyMuPDF)
+│   │   └── quiz_service.py     ← Quiz generation logic
 │   │
 │   ├── workers/
-│   │   └── ai_worker.py
+│   │   ├── ai_worker.py        ← Background AI thread
+│   │   └── quiz_worker.py      ← Background quiz thread
 │   │
 │   └── storage/
-│       └── repositories.py
+│       └── repositories.py     ← SQLite CRUD layer
 │
-├── assets/
-│   ├── icons/
-│   ├── styles/
-│   ├── screenshots/
-│   └── demo/
-│       └── NotepadLLM-demo.gif
-│
-└── tests/
+└── assets/
+    ├── icons/
+    ├── styles/                 ← QSS theme + color palette
+    └── screenshots/
 ```
 
-## Design System
+---
 
-NotepadLLM uses a custom **MUSTARD — Bold, Modern & Playful** design language.
+## 🎨 &nbsp; Design System — MUSTARD
 
-| Color | Hex |
-|---|---|
-| Charcoal | `#282B28` |
-| Mustard | `#D4A017` |
-| Golden Yellow | `#F0C94C` |
-| Soft Cream | `#F7E7B5` |
-| Off-White | `#FFF0F5` |
+NotepadLLM uses a custom **MUSTARD** design language: bold, warm, and distraction-free.
 
-The interface combines warm colors, clean typography, rounded components, and minimal navigation to create a comfortable learning environment.
+<br/>
 
-## Performance & Offline Support
+<div align="center">
 
-NotepadLLM is designed to run locally on everyday desktop hardware.
+| &nbsp; | Swatch | Name | Hex | Usage |
+|:---:|:---:|---|---|---|
+| 🟫 | ![](https://via.placeholder.com/18/282B28/282B28.png) | Charcoal | `#282B28` | Sidebar, window chrome |
+| 🟨 | ![](https://via.placeholder.com/18/F0C94C/F0C94C.png) | Mustard | `#F0C94C` | Active tabs, buttons, highlights |
+| 🟧 | ![](https://via.placeholder.com/18/D4A017/D4A017.png) | Dark Mustard | `#D4A017` | Headings, accents, links |
+| 🟡 | ![](https://via.placeholder.com/18/FAD870/FAD870.png) | Mustard Light | `#FAD870` | Hover tints |
+| 🟤 | ![](https://via.placeholder.com/18/F7E7B5/F7E7B5.png) | Soft Cream | `#F7E7B5` | Panels, secondary surfaces |
+| ⬜ | ![](https://via.placeholder.com/18/FFF8EC/FFF8EC.png) | Off-White | `#FFF8EC` | Document area background |
 
-- No cloud backend required.
-- Lightweight native Qt interface.
-- Background AI inference to keep the UI responsive.
-- Local SQLite storage.
-- Support for quantized language models.
-- Efficient document rendering and page caching.
+</div>
 
-AI performance depends on the selected model and available system resources.
+<br/>
 
-## Contributing
-
-Contributions, feature suggestions, and bug reports are welcome.
-
-To contribute:
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Implement and test your changes.
-4. Commit your changes.
-5. Open a pull request.
-
-Please keep contributions consistent with the project's lightweight, privacy-first architecture.
-
-## License
-
-License information will be provided in the repository's `LICENSE` file.
+The interface pairs warm tones with a charcoal shell, rounded corners, clean Segoe UI typography, and restrained iconography — designed to keep your focus on the content, not the chrome.
 
 ---
+
+## 🧰 &nbsp; Tech Stack
+
+<br/>
+
+<div align="center">
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.12+ |
+| UI Framework | PySide6 / Qt 6 |
+| Styling | Qt Style Sheets (QSS) |
+| PDF Engine | PyMuPDF (fitz) |
+| AI Runtime | Ollama |
+| AI Models | Any locally installed Ollama model |
+| Storage | SQLite (via built-in `sqlite3`) |
+| Threading | QThread + Qt Workers |
+| Platform | Windows 10 / 11 |
+
+</div>
+
+---
+
+## ⚡ &nbsp; Performance & Offline Support
+
+NotepadLLM is built to run comfortably on everyday desktop hardware.
+
+- **No internet required** after setup — works fully offline
+- Lightweight Qt native interface with minimal overhead
+- Background threads for AI inference — UI stays smooth
+- Local SQLite storage — instant reads, zero latency
+- Quantized models supported (e.g. `gemma2:2b` runs on 8 GB RAM)
+- Efficient PDF page rendering with on-demand caching
+
+> Inference speed depends on your hardware and the selected model. Quantized 2B–4B models work well on most modern laptops.
+
+---
+
+## 🤝 &nbsp; Contributing
+
+Contributions, suggestions, and bug reports are very welcome.
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Implement and test your changes
+4. Commit: `git commit -m "feat: describe your change"`
+5. Push and open a Pull Request
+
+Please keep contributions consistent with the project's **lightweight, privacy-first** philosophy.
+
+---
+
+## 📄 &nbsp; License
+
+This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+<br/>
 
 **NotepadLLM**
 
 *Smarter studying. Powered by local AI.*
 
-Built with Python, PySide6, and Ollama.
+<sub>Built with 🐍 Python · ⚡ PySide6 · 🦙 Ollama</sub>
+
+<br/>
+
+</div>
