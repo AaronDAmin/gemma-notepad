@@ -1,8 +1,8 @@
 """Quiz interface — faithful reproduction of reference mockups:
-- GemmaNotepad Quiz Configuration Dashboard.png
+- NotepadLLM Quiz Configuration Dashboard.png
 - AI Quiz Generation Dashboard.png
 - Warm DBMS Quiz Dashboard.png
-- GemmaNotepad Quiz Results Dashboard.png
+- NotepadLLM Quiz Results Dashboard.png
 """
 from __future__ import annotations
 import os
@@ -322,7 +322,7 @@ class CircularProgressGauge(QWidget):
 # ── 1. QuizConfigForm ──────────────────────────────────────────────────────────
 
 class QuizConfigForm(QWidget):
-    """Quiz configuration dashboard matching 'GemmaNotepad Quiz Configuration Dashboard.png'."""
+    """Quiz configuration dashboard matching 'NotepadLLM Quiz Configuration Dashboard.png'."""
 
     generateRequested = Signal(object)
 
@@ -1455,7 +1455,7 @@ class QuizQuestionView(QWidget):
 # ── 4. QuizResultsView ─────────────────────────────────────────────────────────
 
 class QuizResultsView(QWidget):
-    """Quiz results dashboard matching 'GemmaNotepad Quiz Results Dashboard.png'."""
+    """Quiz results dashboard matching 'NotepadLLM Quiz Results Dashboard.png'."""
 
     retryRequested = Signal()
     backToDocRequested = Signal()

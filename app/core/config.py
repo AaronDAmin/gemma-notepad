@@ -12,7 +12,7 @@ DB_PATH     = DATA_DIR / "study_notepad.db"
 DATA_DIR.mkdir(exist_ok=True)
 
 # ── Application meta ───────────────────────────────────────────────────────────
-APP_NAME    = "GemmaNotepad1"
+APP_NAME    = "NotepadLLM"
 APP_VERSION = "0.1.0"
 
 # ── Window defaults ────────────────────────────────────────────────────────────

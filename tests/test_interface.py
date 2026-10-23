@@ -1,4 +1,4 @@
-"""Unit and GUI tests for the GemmaNotepad1 interface."""
+"""Unit and GUI tests for the NotepadLLM interface."""
 import pytest
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QPoint

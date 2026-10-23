@@ -1,10 +1,10 @@
-# GemmaNotepad1
+# NotepadLLM
 
 ### Your intelligent workspace for focused learning.
 
-**GemmaNotepad1** is a modern, lightweight, AI-powered desktop study application built with Python and PySide6. It combines document reading, intelligent explanations, note-taking, and interactive quizzes into a single distraction-free workspace.
+**NotepadLLM** is a modern, lightweight, AI-powered desktop study application built with Python and PySide6. It combines document reading, intelligent explanations, note-taking, and interactive quizzes into a single distraction-free workspace.
 
-Powered by **Ollama and local language models**, GemmaNotepad1 brings AI-assisted learning directly to your computer — without cloud dependencies, API keys, or internet access.
+Powered by **Ollama and local language models**, NotepadLLM brings AI-assisted learning directly to your computer — without cloud dependencies, API keys, or internet access.
 
 **Read. Understand. Practice. Repeat.**
 
@@ -12,7 +12,7 @@ Powered by **Ollama and local language models**, GemmaNotepad1 brings AI-assiste
 
 ## Application Demo
 
-![GemmaNotepad1 Demo](assets/demo/gemmanotepad-demo.gif)
+![NotepadLLM Demo](assets/demo/NotepadLLM-demo.gif)
 
 *Explore documents, highlight concepts, get instant AI explanations, and test your knowledge — all within one workspace.*
 
@@ -53,7 +53,7 @@ Turn your study materials into interactive multiple-choice quizzes.
 
 Your documents stay on your computer.
 
-GemmaNotepad1 uses locally hosted AI models through Ollama, so document analysis and quiz generation do not require external AI services.
+NotepadLLM uses locally hosted AI models through Ollama, so document analysis and quiz generation do not require external AI services.
 
 No account. No API key. No cloud processing.
 
@@ -61,7 +61,7 @@ No account. No API key. No cloud processing.
 
 ### Application Interface
 
-![GemmaNotepad1 Interface](assets/screenshots/main-window.png)
+![NotepadLLM Interface](assets/screenshots/main-window.png)
 
 ### AI-Powered Explanations
 
@@ -132,7 +132,7 @@ If Ollama is not already running, start it using:
 ollama serve
 ```
 
-### 5. Launch GemmaNotepad1
+### 5. Launch NotepadLLM
 
 ```bash
 python main.py
@@ -203,14 +203,14 @@ study-notepad/
 │   ├── styles/
 │   ├── screenshots/
 │   └── demo/
-│       └── gemmanotepad-demo.gif
+│       └── NotepadLLM-demo.gif
 │
 └── tests/
 ```
 
 ## Design System
 
-GemmaNotepad1 uses a custom **MUSTARD — Bold, Modern & Playful** design language.
+NotepadLLM uses a custom **MUSTARD — Bold, Modern & Playful** design language.
 
 | Color | Hex |
 |---|---|
@@ -224,7 +224,7 @@ The interface combines warm colors, clean typography, rounded components, and mi
 
 ## Performance & Offline Support
 
-GemmaNotepad1 is designed to run locally on everyday desktop hardware.
+NotepadLLM is designed to run locally on everyday desktop hardware.
 
 - No cloud backend required.
 - Lightweight native Qt interface.
@@ -255,7 +255,7 @@ License information will be provided in the repository's `LICENSE` file.
 
 ---
 
-**GemmaNotepad1**
+**NotepadLLM**
 
 *Smarter studying. Powered by local AI.*
 

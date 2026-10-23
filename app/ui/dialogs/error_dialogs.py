@@ -1,6 +1,6 @@
 """Error and unsupported file dialogs matching reference mockups:
-- GemmaNotepad1 Ollama Connection Error.png
-- Unsupported File Type Dialog in GemmaNotepad1-2.png
+- NotepadLLM Ollama Connection Error.png
+- Unsupported File Type Dialog in NotepadLLM-2.png
 """
 from __future__ import annotations
 import os
@@ -14,7 +14,7 @@ from PySide6.QtGui import QColor
 
 class OllamaConnectionErrorDialog(QDialog):
     """
-    Ollama connection error modal matching 'GemmaNotepad1 Ollama Connection Error.png'.
+    Ollama connection error modal matching 'NotepadLLM Ollama Connection Error.png'.
     """
 
     retryRequested = Signal()
@@ -71,7 +71,7 @@ class OllamaConnectionErrorDialog(QDialog):
         lbl_title.setStyleSheet("color: #1A1C1A; font-size: 20px; font-weight: 800; font-family: 'Segoe UI', sans-serif; background: transparent;")
         center_col.addWidget(lbl_title)
 
-        lbl_sub = QLabel(f"GemmaNotepad1 is unable to connect to your local Ollama server\nat {host}.")
+        lbl_sub = QLabel(f"NotepadLLM is unable to connect to your local Ollama server\nat {host}.")
         lbl_sub.setAlignment(Qt.AlignCenter)
         lbl_sub.setStyleSheet("color: #7A7465; font-size: 12.5px; background: transparent;")
         center_col.addWidget(lbl_sub)
@@ -178,7 +178,7 @@ class OllamaConnectionErrorDialog(QDialog):
 
 class UnsupportedFileDialog(QDialog):
     """
-    Unsupported file type modal matching 'Unsupported File Type Dialog in GemmaNotepad1-2.png'.
+    Unsupported file type modal matching 'Unsupported File Type Dialog in NotepadLLM-2.png'.
     """
 
     chooseAnotherRequested = Signal()
@@ -222,7 +222,7 @@ class UnsupportedFileDialog(QDialog):
         title_col.setSpacing(2)
         lbl_title = QLabel("Unsupported File Type")
         lbl_title.setStyleSheet("color: #1A1C1A; font-size: 18px; font-weight: 800; font-family: 'Segoe UI', sans-serif; background: transparent;")
-        lbl_sub = QLabel("The file you selected cannot be opened in GemmaNotepad1.")
+        lbl_sub = QLabel("The file you selected cannot be opened in NotepadLLM.")
         lbl_sub.setStyleSheet("color: #7A7465; font-size: 12px; background: transparent;")
         title_col.addWidget(lbl_title)
         title_col.addWidget(lbl_sub)
@@ -267,7 +267,7 @@ class UnsupportedFileDialog(QDialog):
         card_lay.addWidget(file_card)
 
         # Supported formats list
-        lbl_supp = QLabel("ℹ  GemmaNotepad1 currently supports the following file formats:")
+        lbl_supp = QLabel("ℹ  NotepadLLM currently supports the following file formats:")
         lbl_supp.setStyleSheet("color: #1A1C1A; font-size: 12px; font-weight: 600; background: transparent;")
         card_lay.addWidget(lbl_supp)
 

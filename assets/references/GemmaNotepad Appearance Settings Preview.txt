@@ -1,2 +1,2 @@
-Cette page permet de personnaliser l'apparence de GemmaNotepad1  thème clairsombre, couleurs d'accentuation, police, taille du texte, espacement et style de la barre latérale.
+Cette page permet de personnaliser l'apparence de NotepadLLM  thème clairsombre, couleurs d'accentuation, police, taille du texte, espacement et style de la barre latérale.
 Un aperçu en temps réel à droite montre les modifications avant leur application.

@@ -1,4 +1,4 @@
-# GemmaNotepad1 — UI/UX Implementation Specification
+# NotepadLLM — UI/UX Implementation Specification
 
 **Version:** 1.0  
 **Platform:** Windows Desktop  
@@ -402,7 +402,7 @@ Avoid direct coupling between unrelated widgets.
 ## 11. Suggested Architecture
 
 ```text
-gemmanotepad1/
+NotepadLLM/
 ├── main.py
 ├── requirements.txt
 ├── README.md

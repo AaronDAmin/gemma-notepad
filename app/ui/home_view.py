@@ -213,7 +213,7 @@ class HomeView(QWidget):
         header = QVBoxLayout()
         header.setSpacing(6)
 
-        title = QLabel("Welcome to GemmaNotepad1")
+        title = QLabel("Welcome to NotepadLLM")
         title.setStyleSheet(
             "color: #1A1C1A; font-size: 26px; font-weight: 800; font-family: 'Segoe UI', sans-serif;"
         )

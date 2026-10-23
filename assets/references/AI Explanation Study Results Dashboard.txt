@@ -1,4 +1,4 @@
-La page précédente représente le popup AI Explanation de GemmaNotepad1.
+La page précédente représente le popup AI Explanation de NotepadLLM.
 Son objectif est de permettre à l'étudiant de comprendre pourquoi une réponse est correcte ou incorrecte, en utilisant l'IA locale (Ollama) et le contenu du document étudié.
 Comment fonctionne ce popup ?
 1. Question et réponses : il affiche la question du quiz, les quatre propositions, la réponse choisie et la bonne réponse.

@@ -1,7 +1,7 @@
-GemmaNotepad1 — AI-Powered Study Notepad
+NotepadLLM — AI-Powered Study Notepad
 Your intelligent study assistant, fully local
-🎯 What is GemmaNotepad1?
-GemmaNotepad1 is a desktop application designed for students who want to study smarter. It brings together in one place everything you need: read your PDF course materials, take notes, ask an AI for explanations, and test yourself with automatically generated quizzes.
+🎯 What is NotepadLLM?
+NotepadLLM is a desktop application designed for students who want to study smarter. It brings together in one place everything you need: read your PDF course materials, take notes, ask an AI for explanations, and test yourself with automatically generated quizzes.
 
 Everything runs offline, on your computer. No data ever leaves your machine.
 
@@ -12,7 +12,7 @@ A PDF reader for course materials
 A notes app
 Google or ChatGPT for explanations
 Quiz websites to test yourself
-GemmaNotepad1 brings all of that into a single application, with a local AI that actually understands the content of your documents.
+NotepadLLM brings all of that into a single application, with a local AI that actually understands the content of your documents.
 
 ✨ What you can do
 📄 Read your course materials
@@ -36,12 +36,12 @@ After the quiz, you see your mistakes along with explanations and the source pag
 Diagrams, schematics, screenshots — everything displays in the same workspace.
 
 🔒 Why it's different
-Other tools	GemmaNotepad1
+Other tools	NotepadLLM
 Send your data to servers	100% local, nothing leaves
 Require a subscription	Free, open source
 Generic AI that doesn't know your course material	AI that reads and understands YOUR documents
 4 different applications	Everything in one place
-🎨 The GemmaNotepad1 design
+🎨 The NotepadLLM design
 The interface is designed to be pleasant to use during long study sessions:
 
 Warm palette — mustard and cream tones that are less tiring on the eyes than pure white
@@ -67,4 +67,4 @@ The application adapts to modest machines — it was optimized to run comfortabl
 Students who want to understand their course material in depth
 Self-learners who study from PDF resources
 Anyone concerned about keeping their data private
-GemmaNotepad1 — Study faster, understand deeper.
+NotepadLLM — Study faster, understand deeper.

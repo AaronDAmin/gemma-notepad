@@ -1,2 +1,2 @@
-Cette page permet de personnaliser le fonctionnement général de GemmaNotepad1 : langue, démarrage, sauvegarde automatique, emplacement des fichiers, notifications et confirmations.
+Cette page permet de personnaliser le fonctionnement général de NotepadLLM : langue, démarrage, sauvegarde automatique, emplacement des fichiers, notifications et confirmations.
 Elle comprend également des options de sauvegarde et restauration des préférences, ainsi qu'un aperçu de l'application.
