@@ -446,7 +446,7 @@ class MainWindow(QMainWindow):
             self.tab_bar.rename_tab(active_id, name[:20])
 
         doc = Document(
-            id=None, workspace_id=active_id or 1,
+            id=None, workspace_id=1,
             name=name, doc_type=DocumentType.PDF,
             file_path=path,
             content=None,
@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
             self.tab_bar.rename_tab(active_id, name[:20])
 
         doc = Document(
-            id=None, workspace_id=active_id or 1,
+            id=None, workspace_id=1,
             name=name, doc_type=DocumentType.IMAGE,
             file_path=path, content=None,
         )
@@ -495,7 +495,7 @@ class MainWindow(QMainWindow):
             self.tab_bar.rename_tab(active_id, "New Note")
 
         doc = Document(
-            id=None, workspace_id=active_id or 1,
+            id=None, workspace_id=1,
             name="New Note", doc_type=DocumentType.TEXT,
             file_path=None, content="",
         )

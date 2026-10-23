@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QStackedWidget, QSizePolicy, QDialog
 )
 from PySide6.QtCore import Qt, Signal, QTimer, QTime
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush
+from PySide6.QtGui import QPainter, QColor, QPen, QBrush, QFont
 
 from app.workers.quiz_worker import QuizWorker
 from app.services.pdf_service import pdf_service
@@ -313,9 +313,7 @@ class CircularProgressGauge(QWidget):
         painter.drawArc(rect, 90 * 16, span)
 
         painter.setPen(QColor("#1A1C1A"))
-        painter.setFont(self.font())
-        font = painter.font()
-        font.setPixelSize(15)
+        font = QFont("Segoe UI", 11)
         font.setBold(True)
         painter.setFont(font)
         painter.drawText(self.rect(), Qt.AlignCenter, f"{self._value}%")
@@ -326,7 +324,7 @@ class CircularProgressGauge(QWidget):
 class QuizConfigForm(QWidget):
     """Quiz configuration dashboard matching 'GemmaNotepad Quiz Configuration Dashboard.png'."""
 
-    generateRequested = Signal(dict)
+    generateRequested = Signal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1080,7 +1078,7 @@ class QuizLoadingScreen(QWidget):
 class QuizQuestionView(QWidget):
     """Quiz questions dashboard matching 'Warm DBMS Quiz Dashboard.png'."""
 
-    submitRequested = Signal(dict)
+    submitRequested = Signal(object)
     changeSettingsRequested = Signal()
 
     def __init__(self, parent=None):
